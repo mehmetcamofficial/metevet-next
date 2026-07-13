@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { getDictionary } from "@/src/lib/i18n";
+import { getRoutePath } from "@/src/lib/routes";
 import { serviceIcons, services } from "@/src/data/services";
 import type { Locale } from "@/types";
 import { Reveal } from "@/src/components/ui/reveal";
+import Image from "next/image";
 
 export function ServicesPreview({ locale }: { locale: Locale }) {
   const dict = getDictionary(locale);
@@ -16,11 +18,23 @@ export function ServicesPreview({ locale }: { locale: Locale }) {
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#CDA85F]">{dict.home.services.title}</p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[#0D2922] sm:text-4xl">{dict.home.services.description}</h2>
           </div>
-          <Link href={locale === "tr" ? "/tr/hizmetler" : "/en/services"} className="inline-flex items-center gap-2 text-sm font-semibold text-[#123A30] transition hover:text-[#0D2922]">
+          <Link href={getRoutePath("services", locale)} className="inline-flex items-center gap-2 text-sm font-semibold text-[#123A30] transition hover:text-[#0D2922]">
             {dict.home.services.linkLabel}
             <ArrowRight size={16} />
           </Link>
         </div>
+
+        <Reveal className="mt-10" delay={0.04}>
+          <div className="relative aspect-[16/7] overflow-hidden rounded-[1.7rem] border border-[#0D2922]/10 bg-white shadow-[0_12px_35px_rgba(13,41,34,0.07)]">
+            <Image
+              src="/images/clinic/clinic-treatment-room.png"
+              alt="MeteVet modern tedavi odası"
+              fill
+              sizes="(max-width: 1280px) 100vw, 1280px"
+              className="object-cover"
+            />
+          </div>
+        </Reveal>
 
         <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {services.slice(0, 6).map((service, index) => {
@@ -33,7 +47,7 @@ export function ServicesPreview({ locale }: { locale: Locale }) {
                   </div>
                   <h3 className="mt-6 text-xl font-semibold text-[#0D2922]">{service.title}</h3>
                   <p className="mt-3 text-base leading-8 text-[#687A75]">{service.description}</p>
-                  <Link href={service.href} className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#CDA85F] transition group-hover:gap-3">
+                  <Link href={getRoutePath("services", locale)} className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#CDA85F] transition group-hover:gap-3">
                     {dict.common.learnMore}
                     <ArrowRight size={16} />
                   </Link>

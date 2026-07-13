@@ -9,7 +9,7 @@ export function DoctorPreview() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(216,179,106,0.25),_transparent_35%)]" />
           <div className="relative aspect-[4/5] overflow-hidden rounded-[1.3rem] bg-[#d7e4de]">
             <Image
-              src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=900&q=80"
+              src="/images/onur-metehan-cakir.jpg"
               alt="Dr. Onur Metehan Çakır"
               fill
               sizes="(max-width: 768px) 100vw, 45vw"

@@ -7,6 +7,7 @@ import { AppointmentCTA } from "@/src/components/home/appointment-cta";
 import { BlogPreview } from "@/src/components/home/blog-preview";
 import { Faq } from "@/src/components/home/faq";
 import { ContactPreview } from "@/src/components/home/contact-preview";
+import { GallerySection } from "@/src/components/home/gallery-section";
 import { Navbar } from "@/src/components/layout/navbar";
 import { Footer } from "@/src/components/layout/footer";
 import { WhatsappButton } from "@/src/components/shared/whatsapp-button";
@@ -65,6 +66,7 @@ export default async function LocaleHomePage({ params }: { params: Promise<{ loc
           <TrustStrip locale={resolvedLocale} />
           <ServicesPreview locale={resolvedLocale} />
           <DoctorProfile locale={resolvedLocale} />
+          <GallerySection />
           <CarePhilosophy locale={resolvedLocale} />
           <AppointmentCTA locale={resolvedLocale} />
           <BlogPreview locale={resolvedLocale} />

@@ -46,7 +46,7 @@ body {
 
 @keyframes fade-up {
   0% {
-    opacity: 0;
+    opacity: 1;
     transform: translateY(16px);
   }
   100% {

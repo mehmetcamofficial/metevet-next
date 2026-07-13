@@ -1,5 +1,6 @@
 import { ArrowUpRight, MapPin, Phone, Send } from "lucide-react";
 import Link from "next/link";
+import { Logo } from "@/src/components/brand/logo";
 
 export function Footer() {
   return (
@@ -7,7 +8,9 @@ export function Footer() {
       <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,_rgba(255,255,255,0.08),_rgba(255,255,255,0.03))] p-8 shadow-[0_20px_70px_rgba(0,0,0,0.2)] lg:p-10">
         <div className="grid gap-10 lg:grid-cols-[1fr_0.7fr_0.7fr]">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#d8b36a]">MeteVet</p>
+            <Link href="/" aria-label="MeteVet home" className="inline-flex rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CDA85F]/50">
+              <Logo locale="en" variant="light" layout="horizontal" markSize={44} />
+            </Link>
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
               Premium veterinary care, tailored to your pet’s needs.
             </h2>

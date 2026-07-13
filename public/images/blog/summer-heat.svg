@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Pet summer heat safety illustration</title><desc id="desc">A pet water bowl beneath a warm sun.</desc>
+  <rect width="1200" height="675" fill="#F4F0E8"/><circle cx="930" cy="165" r="115" fill="#CDA85F"/><g stroke="#CDA85F" stroke-width="20" stroke-linecap="round"><path d="M930 10v65M930 255v65M775 165h65M1020 165h65M820 55l45 45M995 230l45 45M1040 55l-45 45M865 230l-45 45"/></g>
+  <path d="M255 390h560l-45 175H300z" fill="#123A30"/><path d="M350 430c65-50 125 50 190 0s125 50 190 0" fill="none" stroke="#DDE9E3" stroke-width="20" stroke-linecap="round"/><circle cx="150" cy="600" r="290" fill="#123A30" opacity=".08"/>
+</svg>

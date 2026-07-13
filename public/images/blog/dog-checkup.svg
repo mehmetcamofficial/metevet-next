@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Dog wellness check illustration</title><desc id="desc">A stylized dog with a veterinary stethoscope.</desc>
+  <rect width="1200" height="675" fill="#F4F0E8"/><circle cx="240" cy="100" r="260" fill="#CDA85F" opacity=".22"/><circle cx="1090" cy="620" r="340" fill="#123A30" opacity=".09"/>
+  <path d="M430 250l-105-73 20 158c-24 33-38 74-38 118 0 112 91 203 203 203s203-91 203-203c0-45-15-87-40-121l16-155-100 72c-50-22-108-21-159 1z" fill="#123A30"/>
+  <path d="M790 220v132c0 82-66 148-148 148h-18" fill="none" stroke="#CDA85F" stroke-width="25" stroke-linecap="round"/><circle cx="850" cy="210" r="60" fill="none" stroke="#CDA85F" stroke-width="25"/>
+</svg>

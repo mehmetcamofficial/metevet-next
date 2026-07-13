@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Veterinary warning signs illustration</title><desc id="desc">A calm veterinary warning symbol with a paw.</desc>
+  <rect width="1200" height="675" fill="#DDE9E3"/><circle cx="1040" cy="560" r="350" fill="#CDA85F" opacity=".18"/>
+  <path d="M600 92L1050 590H150z" fill="#123A30"/><rect x="575" y="235" width="50" height="195" rx="25" fill="#F4F0E8"/><circle cx="600" cy="492" r="30" fill="#F4F0E8"/>
+  <g fill="#CDA85F"><circle cx="600" cy="180" r="31"/><circle cx="530" cy="195" r="25"/><circle cx="670" cy="195" r="25"/></g>
+</svg>

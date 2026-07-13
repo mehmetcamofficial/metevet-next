@@ -4,9 +4,11 @@ import { SkipLink } from "@/src/components/shared/skip-link";
 import { Breadcrumbs } from "@/src/components/shared/breadcrumbs";
 import { getDictionary, isLocale } from "@/src/lib/i18n";
 import { buildMetadata } from "@/src/lib/metadata";
+import { getRoutePath } from "@/src/lib/routes";
 import type { Locale } from "@/types";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { services } from "@/src/data/services";
 import { serviceIcons } from "@/src/data/services";
 
@@ -36,8 +38,11 @@ export default async function ServicesRoutePage({ params }: { params: Promise<{ 
       <Navbar locale={resolvedLocale} />
       <main id="main-content" className="px-6 py-16 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <Breadcrumbs items={[{ label: resolvedLocale === "tr" ? "Ana Sayfa" : "Home", href: resolvedLocale === "tr" ? "/tr" : "/en" }, { label: dict.servicesPage.title }]} />
+          <Breadcrumbs items={[{ label: resolvedLocale === "tr" ? "Ana Sayfa" : "Home", href: getRoutePath("home", resolvedLocale) }, { label: dict.servicesPage.title }]} />
           <div className="mt-8 rounded-[2rem] border border-[#0D2922]/10 bg-white p-8 shadow-[0_20px_60px_rgba(13,41,34,0.08)] lg:p-10">
+            <div className="relative mb-8 aspect-[16/7] overflow-hidden rounded-[1.5rem]">
+              <Image src="/images/clinic/clinic-treatment-room.png" alt="MeteVet modern tedavi odası" fill sizes="(max-width: 1280px) 100vw, 1280px" className="object-cover" />
+            </div>
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#CDA85F]">{dict.servicesPage.title}</p>
             <h1 className="mt-4 text-3xl font-semibold tracking-tight text-[#0D2922] sm:text-4xl">{dict.servicesPage.description}</h1>
             <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">

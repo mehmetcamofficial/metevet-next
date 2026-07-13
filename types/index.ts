@@ -116,6 +116,7 @@ export type SiteContent = {
 
 export type ServiceItem = {
   title: string;
+  titleEn?: string;
   description: string;
   icon: string;
   href: string;
@@ -124,15 +125,27 @@ export type ServiceItem = {
 export type BlogPost = {
   slug: string;
   locale: Locale;
+  translationSlug: string;
   title: string;
   description: string;
+  image: string;
+  imageAlt: string;
+  featured: boolean;
+  tags: string[];
+  sections: Array<{
+    id: string;
+    title: string;
+    paragraphs: string[];
+    tone?: "default" | "information" | "warning";
+  }>;
+  tableOfContents: Array<{ id: string; title: string }>;
+  relatedSlugs: string[];
   publishedAt: string;
   updatedAt: string;
   author: string;
   category: string;
   readingTime: string;
   keywords: string[];
-  content: Array<{ type: "paragraph" | "heading"; value: string }>;
 };
 
 export type FaqItem = {

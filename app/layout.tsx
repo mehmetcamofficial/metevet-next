@@ -31,6 +31,15 @@ export const metadata: Metadata = {
       en: "https://metevet.com.tr/en",
     },
   },
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.svg",
+    apple: "/icon.svg",
+  },
+  manifest: "/manifest.webmanifest",
   openGraph: {
     title: "MeteVet | Premium Veterinary Care",
     description: "Luxury veterinary care built around prevention, trust, and modern medicine.",
@@ -38,13 +47,13 @@ export const metadata: Metadata = {
     locale: "en_US",
     siteName: "MeteVet",
     url: "https://metevet.com.tr",
-    images: [{ url: "/images/onur-metehan-cakir.jpg", width: 1200, height: 630, alt: "MeteVet veterinary clinic" }],
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "MeteVet Veterinary Clinic" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "MeteVet | Premium Veterinary Care",
     description: "Luxury veterinary care built around prevention, trust, and modern medicine.",
-    images: ["/images/onur-metehan-cakir.jpg"],
+    images: ["/twitter-image"],
   },
   robots: {
     index: true,

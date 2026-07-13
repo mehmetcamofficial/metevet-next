@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 96" role="img" aria-labelledby="title">
+  <title id="title">MeteVet Veterinary Clinic</title>
+  <rect x="0" y="0" width="96" height="96" rx="21" fill="#F4F0E8"/>
+  <path d="M18 68V27l21 26 20-26v41" fill="none" stroke="#CDA85F" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M54 27l15 41 15-41" fill="none" stroke="#123A30" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="120" y="47" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="35" font-weight="700" letter-spacing="1">MeteVet</text>
+  <text x="121" y="70" fill="#DDE9E3" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="600" letter-spacing="2">VETERINARY CLINIC</text>
+</svg>

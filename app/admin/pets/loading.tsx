@@ -1,0 +1,1 @@
+export default function Loading() { return <main className="min-h-screen bg-[#f4f0e8] p-8" aria-busy="true" aria-live="polite"><div className="h-9 w-48 animate-pulse rounded bg-[#0d2922]/10"/><div className="mt-8 h-72 animate-pulse rounded-2xl bg-white"/><span className="sr-only">Hayvan kayıtları yükleniyor</span></main>; }

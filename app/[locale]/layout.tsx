@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     locale: resolvedLocale as Locale,
     title: resolvedLocale === "tr" ? "MeteVet Veteriner Kliniği | Premium Veteriner Bakım" : "MeteVet Veterinary Clinic | Premium Veterinary Care",
     description: resolvedLocale === "tr" ? "Kuşadası'ndaki MeteVet Veteriner Kliniği, koruyucu hekimlikten tanı ve tedaviye kadar premium veteriner bakım sunar." : "MeteVet Veterinary Clinic in Kuşadası offers premium veterinary care from preventive medicine to diagnosis and treatment.",
-    image: "/images/onur-metehan-cakir.jpg",
+    image: "/opengraph-image",
   });
 }
 

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { PhoneCall, Sparkles } from "lucide-react";
 import { getDictionary } from "@/src/lib/i18n";
+import { getRoutePath } from "@/src/lib/routes";
 import { siteConfig } from "@/src/data/site";
 import type { Locale } from "@/types";
 import { Reveal } from "@/src/components/ui/reveal";
@@ -22,7 +23,7 @@ export function Hero({ locale }: { locale: Locale }) {
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-8 text-[#687A75]">{dict.home.hero.description}</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <ButtonLink href={locale === "tr" ? "/tr/randevu" : "/en/appointment"} variant="primary">
+            <ButtonLink href={getRoutePath("appointment", locale)} variant="primary">
               {dict.home.hero.primaryCta}
             </ButtonLink>
             <ButtonLink href={`https://wa.me/${siteConfig.whatsappNumber}`} variant="secondary" external>
@@ -43,12 +44,12 @@ export function Hero({ locale }: { locale: Locale }) {
           <div className="relative overflow-hidden rounded-[2rem] border border-[#0D2922]/10 bg-white p-3 shadow-[0_24px_70px_rgba(13,41,34,0.12)]">
             <div className="relative aspect-[4/5] overflow-hidden rounded-[1.4rem]">
               <Image
-                src={siteConfig.doctorImage}
-                alt={siteConfig.doctorName}
+                src="/images/clinic/clinic-exterior.png"
+                alt="MeteVet Veteriner Kliniği dış görünümü"
                 fill
                 priority
                 sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover object-[center_25%] transition duration-500 hover:scale-[1.03]"
+                className="object-cover transition duration-500 hover:scale-[1.03]"
               />
             </div>
           </div>

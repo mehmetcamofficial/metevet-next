@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CalendarDays, Menu, PhoneCall } from "lucide-react";
+import { Logo } from "@/src/components/brand/logo";
 
 const navItems = [
   { label: "Hakkımızda", href: "#about" },
@@ -13,16 +14,8 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#081a16]/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[#d8b36a]/40 bg-[#0f2d24] text-[#d8b36a] shadow-[0_10px_35px_rgba(216,179,106,0.2)]">
-            <span className="text-lg font-semibold">M</span>
-          </div>
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#d8b36a]">
-              MeteVet
-            </p>
-            <p className="text-sm text-[#d8e2dd]">Premium Veterinary Care</p>
-          </div>
+        <Link href="/" aria-label="MeteVet home" className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CDA85F]/50">
+          <Logo locale="en" variant="light" layout="horizontal" markSize={42} />
         </Link>
 
         <nav className="hidden items-center gap-7 text-sm font-medium text-[#d8e2dd] lg:flex">

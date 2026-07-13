@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CalendarDays, PhoneCall, MessageCircleMore } from "lucide-react";
 import { getDictionary } from "@/src/lib/i18n";
+import { getRoutePath } from "@/src/lib/routes";
 import { siteConfig } from "@/src/data/site";
 import type { Locale } from "@/types";
 import { Reveal } from "@/src/components/ui/reveal";
@@ -26,7 +27,7 @@ export function AppointmentCTA({ locale }: { locale: Locale }) {
                 <MessageCircleMore size={16} />
                 {dict.home.appointment.whatsappLabel}
               </a>
-              <Link href={locale === "tr" ? "/tr/randevu" : "/en/appointment"} className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white px-5 py-3 text-sm font-semibold text-[#123A30] transition hover:bg-[#DDE9E3]">
+              <Link href={getRoutePath("appointment", locale)} className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white px-5 py-3 text-sm font-semibold text-[#123A30] transition hover:bg-[#DDE9E3]">
                 <CalendarDays size={16} />
                 {dict.home.appointment.pageLabel}
               </Link>

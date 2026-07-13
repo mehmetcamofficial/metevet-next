@@ -15,7 +15,7 @@ export function DoctorProfile({ locale }: { locale: Locale }) {
           <div className="relative aspect-[4/5] overflow-hidden rounded-[1.3rem]">
             <Image
               src={siteConfig.doctorImage}
-              alt={siteConfig.doctorName}
+              alt="Veteriner Hekim Onur Metehan Çakır"
               fill
               sizes="(max-width: 768px) 100vw, 45vw"
               className="object-cover object-[center_25%] transition duration-500 hover:scale-[1.03]"

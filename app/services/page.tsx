@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PageShell } from "@/components/site/page-shell";
 import { services } from "@/data/site-content";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Services | MeteVet",
@@ -16,6 +17,9 @@ export default function ServicesPage() {
       ctaLabel="Schedule a visit"
       ctaHref="/appointment"
     >
+      <div className="relative mb-8 aspect-[16/7] overflow-hidden rounded-[2rem] border border-white/10">
+        <Image src="/images/clinic/clinic-treatment-room.png" alt="MeteVet modern treatment room" fill sizes="(max-width: 1280px) 100vw, 1280px" className="object-cover" />
+      </div>
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {services.map((service) => (
           <article key={service.title} className="rounded-[1.75rem] border border-white/10 bg-[linear-gradient(145deg,_rgba(255,255,255,0.08),_rgba(255,255,255,0.03))] p-8 shadow-[0_15px_45px_rgba(0,0,0,0.16)]">

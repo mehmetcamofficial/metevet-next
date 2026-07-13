@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { MapPin, MessageCircleMore, Phone, Send } from "lucide-react";
 import Link from "next/link";
 import { PageShell } from "@/components/site/page-shell";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Contact | MeteVet",
@@ -17,6 +18,9 @@ export default function ContactPage() {
       ctaLabel="Call now"
       ctaHref="tel:+905000000000"
     >
+      <div className="relative mb-8 aspect-[16/7] overflow-hidden rounded-[2rem] border border-white/10">
+        <Image src="/images/clinic/clinic-exterior.png" alt="MeteVet veterinary clinic exterior" fill sizes="(max-width: 1280px) 100vw, 1280px" className="object-cover" />
+      </div>
       <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,_rgba(255,255,255,0.08),_rgba(255,255,255,0.03))] p-8 shadow-[0_20px_70px_rgba(0,0,0,0.2)]">
           <h2 className="text-3xl font-semibold text-white">Contact details</h2>

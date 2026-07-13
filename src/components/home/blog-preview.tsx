@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { getDictionary } from "@/src/lib/i18n";
 import { getBlogPosts } from "@/src/data/blog";
+import { getBlogRoute, getRoutePath } from "@/src/lib/routes";
 import type { Locale } from "@/types";
 import { Reveal } from "@/src/components/ui/reveal";
 
@@ -17,7 +18,7 @@ export function BlogPreview({ locale }: { locale: Locale }) {
             <p className="text-sm font-semibold uppercase tracking-[0.3em] text-[#CDA85F]">{dict.home.blog.title}</p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight text-[#0D2922] sm:text-4xl">{dict.home.blog.description}</h2>
           </div>
-          <Link href={locale === "tr" ? "/tr/blog" : "/en/blog"} className="inline-flex items-center gap-2 text-sm font-semibold text-[#123A30] transition hover:text-[#0D2922]">
+          <Link href={getRoutePath("blog", locale)} className="inline-flex items-center gap-2 text-sm font-semibold text-[#123A30] transition hover:text-[#0D2922]">
             {dict.home.blog.viewAll}
             <ArrowRight size={16} />
           </Link>
@@ -32,7 +33,7 @@ export function BlogPreview({ locale }: { locale: Locale }) {
                 <p className="mt-4 text-base leading-8 text-[#687A75]">{post.description}</p>
                 <div className="mt-6 flex items-center justify-between text-sm text-[#687A75]">
                   <span>{post.readingTime}</span>
-                  <Link href={locale === "tr" ? `/tr/blog/${post.slug}` : `/en/blog/${post.slug}`} className="font-semibold text-[#123A30] transition group-hover:gap-2">
+                  <Link href={getBlogRoute(locale, post.slug)} className="font-semibold text-[#123A30] transition group-hover:gap-2">
                     {dict.common.readMore}
                   </Link>
                 </div>

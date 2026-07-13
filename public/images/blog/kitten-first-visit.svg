@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Kitten first veterinary visit illustration</title><desc id="desc">A small cat beside a veterinary medical bag.</desc>
+  <rect width="1200" height="675" fill="#F4F0E8"/><circle cx="170" cy="540" r="320" fill="#123A30" opacity=".09"/><circle cx="1050" cy="90" r="250" fill="#CDA85F" opacity=".2"/>
+  <path d="M430 275l-62-83-16 115c-44 37-67 92-60 149 10 96 93 167 189 157 96-9 167-93 158-189-6-55-37-104-82-133l-26-110-52 90c-16-1-33 0-49 4z" fill="#123A30"/>
+  <rect x="690" y="295" width="260" height="230" rx="35" fill="#CDA85F"/><path d="M765 295v-55h110v55M820 350v120M760 410h120" fill="none" stroke="#fff" stroke-width="24" stroke-linecap="round"/>
+</svg>

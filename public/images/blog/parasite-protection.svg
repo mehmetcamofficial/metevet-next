@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Dog parasite protection illustration</title><desc id="desc">A dog silhouette inside a protective circle.</desc>
+  <rect width="1200" height="675" fill="#DDE9E3"/><circle cx="600" cy="338" r="270" fill="#123A30"/><circle cx="600" cy="338" r="215" fill="#F4F0E8"/>
+  <path d="M510 290l-80-55 16 119c-18 25-28 55-28 88 0 84 68 152 152 152s152-68 152-152c0-34-11-65-30-91l12-116-75 54c-38-16-81-16-119 1z" fill="#123A30"/>
+  <path d="M825 165l52 52-130 130" fill="none" stroke="#CDA85F" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/><circle cx="1020" cy="590" r="280" fill="#CDA85F" opacity=".14"/>
+</svg>

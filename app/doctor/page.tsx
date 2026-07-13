@@ -22,7 +22,7 @@ export default function DoctorPage() {
         <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-[#0f2d24] p-4 shadow-[0_20px_70px_rgba(0,0,0,0.2)]">
           <div className="relative aspect-[4/5] overflow-hidden rounded-[1.5rem]">
             <Image
-              src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=900&q=80"
+              src="/images/onur-metehan-cakir.jpg"
               alt="Dr. Onur Metehan Çakır"
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
