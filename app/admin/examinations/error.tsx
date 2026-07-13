@@ -1,0 +1,1 @@
+"use client";export default function ErrorPage({reset}:{reset:()=>void}){return <div role="alert" className="rounded bg-red-50 p-6">Kayıtlar yüklenemedi.<button onClick={reset} className="ml-3 rounded border px-3 py-2">Tekrar Dene</button></div>}

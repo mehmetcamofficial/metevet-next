@@ -1,0 +1,1 @@
+export default function Loading(){return <main className="p-8" aria-busy="true"><div className="h-10 w-64 animate-pulse rounded bg-black/10"/><div className="mt-6 h-96 animate-pulse rounded-2xl bg-white"/><span className="sr-only">Muayene kayıtları yükleniyor</span></main>}

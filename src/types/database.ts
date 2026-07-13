@@ -203,6 +203,12 @@ export type Database = {
         Update: never;
         Relationships: [];
       };
+      examinations: {
+        Row: TimestampColumns & { id: string; pet_id: string; owner_id: string; appointment_id: string | null; veterinarian_id: string; status: "draft" | "finalized" | "archived"; visit_type: "general_exam" | "follow_up" | "vaccination" | "emergency" | "surgery_control" | "dental" | "other"; chief_complaint: string | null; history: string | null; examination_findings: string | null; assessment: string | null; diagnosis: string | null; procedures: string | null; treatment_plan: string | null; medications_notes: string | null; recommendations: string | null; follow_up_at: string | null; weight_kg: number | null; temperature_c: number | null; heart_rate: number | null; respiratory_rate: number | null; internal_notes: string | null; finalized_at: string | null; archived_at: string | null };
+        Insert: { id?: string; pet_id: string; owner_id: string; appointment_id?: string | null; veterinarian_id: string; status?: "draft" | "finalized" | "archived"; visit_type: "general_exam" | "follow_up" | "vaccination" | "emergency" | "surgery_control" | "dental" | "other"; chief_complaint?: string | null; history?: string | null; examination_findings?: string | null; assessment?: string | null; diagnosis?: string | null; procedures?: string | null; treatment_plan?: string | null; medications_notes?: string | null; recommendations?: string | null; follow_up_at?: string | null; weight_kg?: number | null; temperature_c?: number | null; heart_rate?: number | null; respiratory_rate?: number | null; internal_notes?: string | null; finalized_at?: string | null; archived_at?: string | null; created_at?: string; updated_at?: string };
+        Update: Partial<Database["public"]["Tables"]["examinations"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: { [_ in never]: never };
     Functions: {

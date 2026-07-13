@@ -8,6 +8,7 @@ import { canPermanentlyDelete, canWriteClinicalRecords } from "@/src/lib/admin/p
 import { formatPetAge, speciesLabels, type PetSpecies } from "@/src/lib/admin/records";
 import { requireStaff } from "@/src/lib/auth/require-staff";
 import { createClient } from "@/src/lib/supabase/server";
+import { PetExaminationHistory } from "@/src/components/admin/examinations/pet-examination-history";
 
 const date = (value: string) => new Intl.DateTimeFormat("tr-TR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 const sexLabels = { female: "Dişi", male: "Erkek", unknown: "Bilinmiyor" } as const;
@@ -18,6 +19,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ id: 
     <section className="rounded-2xl bg-white p-6"><h2 className="text-xl font-semibold">Yaklaşan Modüller</h2><ul className="mt-5 space-y-3 text-sm text-[#526a64]"><li className="rounded-lg bg-[#f4f0e8] p-4">Randevular — sonraki aşamada</li><li className="rounded-lg bg-[#f4f0e8] p-4">Aşı kayıtları — sonraki aşamada</li><li className="rounded-lg bg-[#f4f0e8] p-4">Klinik kayıtlar — sonraki aşamada</li></ul></section></div>
     <section className="mt-6 rounded-2xl bg-white p-6"><h2 className="text-xl font-semibold">İşlem Geçmişi</h2>{auditResult.data?.length ? <ul className="mt-4 space-y-2 text-sm">{auditResult.data.map((entry) => <li key={entry.id} className="flex justify-between gap-4 border-b py-2"><span>{entry.action}</span><time>{date(entry.created_at)}</time></li>)}</ul> : <p className="mt-3 text-sm text-[#526a64]">Henüz audit kaydı yok.</p>}</section>
     {isAdmin ? <section className="mt-6 flex flex-wrap gap-3 rounded-2xl bg-white p-6">{pet.archived_at ? <ConfirmDialog title="Kaydı geri yükle" description="Hayvan yeniden aktif listede görünür." triggerLabel="Geri Yükle" confirmLabel="Geri Yükle" action={restorePet.bind(null, id)} /> : <ConfirmDialog title="Kaydı arşivle" description="Kayıt gizlenir fakat klinik veriler korunur." triggerLabel="Arşivle" confirmLabel="Arşivle" action={archivePet.bind(null, id)} />}{pet.archived_at ? <ConfirmDialog danger title="Kalıcı olarak sil" description="Bu işlem geri alınamaz. Bağlı klinik kayıtları varsa veritabanı silmeyi engeller." triggerLabel="Kalıcı Sil" confirmLabel="Kalıcı Sil" action={deletePet.bind(null, id)} /> : null}</section> : null}
+    <PetExaminationHistory petId={id} role={session.profile.role} />
   </AdminShell>;
 }
 function Item({ label, children }: { label: string; children: React.ReactNode }) { return <div><dt className="text-xs font-semibold uppercase tracking-wider text-[#526a64]">{label}</dt><dd className="mt-1">{children}</dd></div>; }

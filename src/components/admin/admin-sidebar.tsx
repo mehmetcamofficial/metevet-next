@@ -7,9 +7,10 @@ import type { UserRole } from "@/src/types/database";
 const shared = [
   { href: "/admin", label: "Genel Bakış" }, { href: "/admin/owners", label: "Hayvan Sahipleri" },
   { href: "/admin/pets", label: "Hayvanlar" }, { href: "/admin/appointments", label: "Randevular" }, { href: "/admin/calendar", label: "Takvim" },
+  { href: "/admin/examinations", label: "Muayeneler" },
 ];
 const comingSoon: Record<UserRole, string[]> = {
-  admin: ["Personel", "Ayarlar", "Audit Log"], veterinarian: ["Muayeneler", "Aşı Takibi"], staff: [],
+  admin: ["Personel", "Ayarlar", "Audit Log"], veterinarian: ["Aşı Takibi"], staff: [],
 };
 const roleLabels: Record<UserRole, string> = { admin: "Yönetici", veterinarian: "Veteriner Hekim", staff: "Personel" };
 

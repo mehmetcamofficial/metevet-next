@@ -1,0 +1,1 @@
+export function ClinicalSection({title,value}:{title:string;value:string|null}){return <section className="border-t border-[#0d2922]/10 pt-5"><h2 className="font-semibold">{title}</h2><p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-[#39554e]">{value||"Belirtilmemiş."}</p></section>}
