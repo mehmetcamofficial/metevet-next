@@ -1,0 +1,1 @@
+import type{ReactNode}from"react";export function VaccineTable({children}:{children:ReactNode}){return <div className="overflow-x-auto"><table className="w-full"><tbody>{children}</tbody></table></div>}

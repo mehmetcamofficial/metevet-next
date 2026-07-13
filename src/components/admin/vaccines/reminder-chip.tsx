@@ -1,0 +1,1 @@
+import{dueState,formatDue}from"@/src/lib/admin/preventive-care";export function ReminderChip({date}:{date:string|null}){const s=dueState(date);return <span className={`rounded-full px-2 py-1 text-xs ${s.is_overdue?"bg-red-100 text-red-900":s.is_due?"bg-amber-100 text-amber-900":"bg-stone-100"}`}>{formatDue(date)}</span>}

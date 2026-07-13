@@ -1,0 +1,1 @@
+import Link from"next/link";export function TimelineItem({href,title,date}:{href:string;title:string;date:string}){return <li><Link href={href} className="font-medium hover:underline">{title}</Link><time className="ml-2 text-xs text-[#526a64]">{new Intl.DateTimeFormat("tr-TR").format(new Date(date))}</time></li>}
