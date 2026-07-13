@@ -1,0 +1,15 @@
+export const siteConfig = {
+  name: "MeteVet Veteriner Kliniği",
+  domain: "https://metevet.com.tr",
+  phone: "+90 506 585 91 55",
+  whatsappNumber: "905065859155",
+  location: "Kuşadası, Aydın, Türkiye",
+  doctorName: "Onur Metehan Çakır",
+  doctorTitle: "Veteriner Hekim",
+  education: "Mehmet Akif Ersoy Üniversitesi Veteriner Fakültesi",
+  graduationYear: "2020",
+  experience: "4+ yıl",
+  doctorImage: "/images/onur-metehan-cakir.jpg",
+  addressNote: "Tam klinik adresi yakında eklenecektir.",
+  addressNoteEn: "The full clinic address will be added soon.",
+};
