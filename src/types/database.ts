@@ -13,7 +13,9 @@ export type AppointmentStatus =
   | "completed"
   | "cancelled"
   | "no_show";
-export type ReminderStatus = "pending" | "sent" | "cancelled" | "failed";
+export type ReminderStatus = "pending" | "ready" | "sent" | "cancelled" | "failed";
+export type ReminderType = "appointment_upcoming" | "appointment_same_day" | "vaccine_due" | "vaccine_overdue" | "parasite_due" | "parasite_overdue" | "follow_up_due" | "custom";
+export type ReminderChannel = "whatsapp" | "sms" | "email" | "internal";
 export type PetSex = "female" | "male" | "unknown";
 export type AppointmentSource = "website" | "plandok" | "whatsapp" | "phone" | "walk_in" | "admin";
 
@@ -158,11 +160,25 @@ export type Database = {
           pet_id: string | null;
           appointment_id: string | null;
           vaccine_record_id: string | null;
+          parasite_record_id: string | null;
+          examination_id: string | null;
+          reminder_type: ReminderType;
           status: ReminderStatus;
-          remind_at: string;
-          channel: string;
-          message: string;
+          scheduled_for: string;
+          channel: ReminderChannel;
+          retry_count: number;
+          recipient_name: string;
+          recipient_phone: string | null;
+          recipient_email: string | null;
+          message_template_key: string | null;
+          rendered_message: string | null;
           sent_at: string | null;
+          failed_at: string | null;
+          cancelled_at: string | null;
+          failure_reason: string | null;
+          metadata: Json;
+          created_by: string | null;
+          sent_by: string | null;
         };
         Insert: {
           id?: string;
@@ -170,15 +186,35 @@ export type Database = {
           pet_id?: string | null;
           appointment_id?: string | null;
           vaccine_record_id?: string | null;
+          parasite_record_id?: string | null;
+          examination_id?: string | null;
+          reminder_type: ReminderType;
           status?: ReminderStatus;
-          remind_at: string;
-          channel: string;
-          message: string;
+          scheduled_for: string;
+          channel: ReminderChannel;
+          retry_count?: number;
+          recipient_name: string;
+          recipient_phone?: string | null;
+          recipient_email?: string | null;
+          message_template_key?: string | null;
+          rendered_message?: string | null;
           sent_at?: string | null;
+          failed_at?: string | null;
+          cancelled_at?: string | null;
+          failure_reason?: string | null;
+          metadata?: Json;
+          created_by?: string | null;
+          sent_by?: string | null;
           created_at?: string;
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["reminders"]["Insert"]>;
+        Relationships: [];
+      };
+      reminder_templates: {
+        Row: TimestampColumns & { id: string; key: string; name: string; channel: ReminderChannel; language: string; subject: string | null; body: string; is_active: boolean };
+        Insert: { id?: string; key: string; name: string; channel: ReminderChannel; language: string; subject?: string | null; body: string; is_active?: boolean; created_at?: string; updated_at?: string };
+        Update: Partial<Database["public"]["Tables"]["reminder_templates"]["Insert"]>;
         Relationships: [];
       };
       audit_logs: {

@@ -15,7 +15,7 @@ export default async function AdminPage() {
   const todayRange = calendarRange(today, "day");
   const weekEnd = new Date(); weekEnd.setDate(weekEnd.getDate() + 7);
   const now = new Date().toISOString();
-  const [todayResult, upcomingResult, pendingCount, ownerCount, petCount, vaccineCount, recentOwners, recentPets] = await Promise.all([
+  const [todayResult, upcomingResult, pendingCount, ownerCount, petCount, vaccineCount, recentOwners, recentPets, pendingReminders, todayReminders, failedReminders, overduePreventiveReminders] = await Promise.all([
     supabase.from("appointments").select("id, starts_at, status, service_key, owner_id, pet_id").gte("starts_at", todayRange.start).lt("starts_at", todayRange.end).neq("status", "cancelled").order("starts_at").limit(8),
     supabase.from("appointments").select("id, starts_at, status, service_key, owner_id, pet_id").gte("starts_at", todayRange.end).lt("starts_at", weekEnd.toISOString()).neq("status", "cancelled").order("starts_at").limit(8),
     supabase.from("appointments").select("id", { count: "exact", head: true }).eq("status", "pending"),
@@ -24,6 +24,10 @@ export default async function AdminPage() {
     supabase.from("vaccine_records").select("id", { count: "exact", head: true }).gte("next_due_at", now),
     supabase.from("owners").select("id, full_name, phone, created_at").is("archived_at", null).order("created_at", { ascending: false }).limit(5),
     supabase.from("pets").select("id, name, species, created_at").is("archived_at", null).order("created_at", { ascending: false }).limit(5),
+    supabase.from("reminders").select("id", { count: "exact", head: true }).in("status", ["pending", "ready"]),
+    supabase.from("reminders").select("id", { count: "exact", head: true }).gte("scheduled_for", todayRange.start).lt("scheduled_for", todayRange.end).in("status", ["pending", "ready"]),
+    supabase.from("reminders").select("id", { count: "exact", head: true }).eq("status", "failed"),
+    supabase.from("reminders").select("id", { count: "exact", head: true }).in("reminder_type", ["vaccine_overdue", "parasite_overdue"]).in("status", ["pending", "ready"]),
   ]);
 
   const appointments = [...(todayResult.data ?? []), ...(upcomingResult.data ?? [])];
@@ -41,10 +45,12 @@ export default async function AdminPage() {
     ["Aktif Hayvan Sahipleri", ownerCount.count ?? 0], ["Aktif Hayvanlar", petCount.count ?? 0],
     ["Bu Hafta Yaklaşan Randevular", upcomingResult.data?.length ?? 0], ["Yaklaşan Aşılar", vaccineCount.count ?? "Henüz veri yok"],
   ] as const;
+  const reminderMetrics = [["Bekleyen Hatırlatmalar", pendingReminders.count ?? 0], ["Bugün Gönderilecek", todayReminders.count ?? 0], ["Başarısız Hatırlatmalar", failedReminders.count ?? 0], ["Geciken Koruyucu Bakım", overduePreventiveReminders.count ?? 0]] as const;
 
   return <>
     <div><p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#8a6c32]">MeteVet Yönetim Paneli</p><h1 className="mt-2 text-3xl font-semibold">Genel Bakış</h1><p className="mt-2 text-[#526a64]">Klinik operasyonlarının güncel özeti.</p></div>
     <section aria-label="Klinik özeti" className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{metrics.map(([label, value]) => <article key={label} className="rounded-2xl border border-[#0d2922]/10 bg-white p-5"><p className="text-sm text-[#526a64]">{label}</p><p className="mt-3 text-3xl font-semibold">{value}</p></article>)}</section>
+    <section aria-label="Hatırlatma özeti" className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{reminderMetrics.map(([label, value]) => <Link href="/admin/reminders" key={label} className="rounded-2xl border border-[#cda85f]/30 bg-white p-5 focus-visible:outline-2 focus-visible:outline-[#cda85f]"><p className="text-sm text-[#526a64]">{label}</p><p className="mt-2 text-2xl font-semibold">{value}</p></Link>)}</section>
     <div className="mt-7 grid gap-6 xl:grid-cols-2"><AppointmentSection title="Bugünkü Randevular" items={todayResult.data ?? []} ownerMap={ownerMap} petMap={petMap}/><AppointmentSection title="Yaklaşan Randevular" items={upcomingResult.data ?? []} ownerMap={ownerMap} petMap={petMap}/></div>
     <section className="mt-7 rounded-2xl bg-white p-6"><h2 className="text-xl font-semibold">Hızlı İşlemler</h2><div className="mt-5 flex flex-wrap gap-3">{canCreate ? <><Quick href="/admin/owners/new">Yeni Hayvan Sahibi</Quick><Quick href="/admin/pets/new">Yeni Hayvan</Quick><Quick href="/admin/appointments/new">Yeni Randevu</Quick></> : null}<Quick href="/admin/calendar">Takvimi Aç</Quick></div></section>
     <div className="mt-7 grid gap-6 xl:grid-cols-2"><Recent title="Son Eklenen Hayvan Sahipleri" empty="Henüz hayvan sahibi kaydı yok." items={(recentOwners.data ?? []).map((owner) => ({ href: `/admin/owners/${owner.id}`, title: owner.full_name, detail: owner.phone }))}/><Recent title="Son Eklenen Hayvanlar" empty="Henüz hayvan kaydı yok." items={(recentPets.data ?? []).map((pet) => ({ href: `/admin/pets/${pet.id}`, title: pet.name, detail: pet.species }))}/></div>

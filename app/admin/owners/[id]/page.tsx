@@ -7,6 +7,7 @@ import { StatusBadge } from "@/src/components/admin/status-badge";
 import { canPermanentlyDelete, canWriteClinicalRecords } from "@/src/lib/admin/permissions";
 import { requireStaff } from "@/src/lib/auth/require-staff";
 import { createClient } from "@/src/lib/supabase/server";
+import { EntityReminders } from "@/src/components/admin/reminders/entity-reminders";
 
 const date = (value: string) => new Intl.DateTimeFormat("tr-TR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 export default async function OwnerDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -22,6 +23,7 @@ export default async function OwnerDetailPage({ params }: { params: Promise<{ id
     <section className="rounded-2xl bg-white p-6"><h2 className="text-xl font-semibold">Bağlı Hayvanlar</h2>{petsResult.data?.length ? <ul className="mt-5 divide-y">{petsResult.data.map((pet) => <li key={pet.id} className="py-3"><Link href={`/admin/pets/${pet.id}`} className="font-medium hover:underline">{pet.name}</Link><span className="ml-2 text-sm text-[#526a64]">{pet.species}</span></li>)}</ul> : <p className="mt-4 text-sm text-[#526a64]">Bağlı hayvan kaydı yok.</p>}</section></div>
     <section className="mt-6 rounded-2xl bg-white p-6"><h2 className="text-xl font-semibold">İşlem Geçmişi</h2>{auditResult.data?.length ? <ul className="mt-4 space-y-2 text-sm">{auditResult.data.map((entry) => <li key={entry.id} className="flex justify-between gap-4 border-b py-2"><span>{entry.action}</span><time>{date(entry.created_at)}</time></li>)}</ul> : <p className="mt-3 text-sm text-[#526a64]">Henüz audit kaydı yok.</p>}</section>
     {isAdmin ? <section className="mt-6 flex flex-wrap gap-3 rounded-2xl border border-[#0d2922]/10 bg-white p-6" aria-label="Kayıt işlemleri">{owner.archived_at ? <ConfirmDialog title="Kaydı geri yükle" description="Kayıt yeniden aktif listede görünür." triggerLabel="Geri Yükle" confirmLabel="Geri Yükle" action={restoreOwner.bind(null, id)} /> : <ConfirmDialog title="Kaydı arşivle" description="Kayıt listeden gizlenir fakat veriler korunur." triggerLabel="Arşivle" confirmLabel="Arşivle" action={archiveOwner.bind(null, id)} />}{owner.archived_at ? <ConfirmDialog danger title="Kalıcı olarak sil" description="Bu işlem geri alınamaz. Bağlı klinik kayıtları varsa veritabanı silmeyi engeller." triggerLabel="Kalıcı Sil" confirmLabel="Kalıcı Sil" action={deleteOwner.bind(null, id)} /> : null}</section> : null}
+    <EntityReminders ownerId={id} />
   </AdminShell>;
 }
 function Item({ label, children }: { label: string; children: React.ReactNode }) { return <div><dt className="text-xs font-semibold uppercase tracking-wider text-[#526a64]">{label}</dt><dd className="mt-1">{children}</dd></div>; }

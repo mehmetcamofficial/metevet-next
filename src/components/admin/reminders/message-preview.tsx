@@ -1,0 +1,1 @@
+export function MessagePreview({message}:{message:string|null}){return <pre className="whitespace-pre-wrap rounded-xl border bg-[#f4f0e8] p-4 font-sans text-sm">{message||"Mesaj henüz oluşturulmadı."}</pre>}

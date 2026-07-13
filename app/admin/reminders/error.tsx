@@ -1,0 +1,1 @@
+"use client";export default function ErrorPage({reset}:{reset:()=>void}){return <div role="alert" className="rounded-xl bg-white p-8"><h2 className="font-semibold">Hatırlatmalar yüklenemedi</h2><p className="mt-2 text-sm">Lütfen tekrar deneyin.</p><button onClick={reset} className="mt-4 rounded border px-4 py-2">Tekrar dene</button></div>}
