@@ -15,6 +15,7 @@ export type AppointmentStatus =
   | "no_show";
 export type ReminderStatus = "pending" | "sent" | "cancelled" | "failed";
 export type PetSex = "female" | "male" | "unknown";
+export type AppointmentSource = "website" | "plandok" | "whatsapp" | "phone" | "walk_in" | "admin";
 
 type TimestampColumns = {
   created_at: string;
@@ -98,24 +99,26 @@ export type Database = {
           owner_id: string;
           pet_id: string;
           assigned_user_id: string | null;
+          service_key: string;
           status: AppointmentStatus;
           starts_at: string;
           ends_at: string;
           reason: string | null;
-          notes: string | null;
-          source: string;
+          internal_notes: string | null;
+          source: AppointmentSource;
         };
         Insert: {
           id?: string;
           owner_id: string;
           pet_id: string;
           assigned_user_id?: string | null;
+          service_key: string;
           status?: AppointmentStatus;
           starts_at: string;
           ends_at: string;
           reason?: string | null;
-          notes?: string | null;
-          source?: string;
+          internal_notes?: string | null;
+          source?: AppointmentSource;
           created_at?: string;
           updated_at?: string;
         };

@@ -1,0 +1,1 @@
+export default function Loading(){return <main className="min-h-screen bg-[#f4f0e8] p-8" aria-busy="true"><div className="h-12 animate-pulse rounded bg-white"/><div className="mt-6 h-96 animate-pulse rounded-2xl bg-white"/><span className="sr-only">Takvim yükleniyor</span></main>}

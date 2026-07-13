@@ -53,6 +53,7 @@ export function Footer({ locale }: { locale: Locale }) {
             <Link href={getRoutePath("contact", locale)} className="transition hover:text-[#123A30]">{dict.footer.contact}</Link>
             <span>{dict.footer.legal}</span>
             <Link href={getRoutePath("blog", locale)} className="transition hover:text-[#123A30]">{dict.footer.language}</Link>
+            <Link href="/admin/login" className="text-[#687A75]/75 transition hover:text-[#123A30]">{locale === "tr" ? "Personel Girişi" : "Staff Login"}</Link>
           </div>
         </div>
       </div>

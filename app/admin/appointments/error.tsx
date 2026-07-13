@@ -1,0 +1,1 @@
+"use client";export default function ErrorPage({reset}:{reset:()=>void}){return <main className="p-8"><div role="alert" className="rounded-xl bg-red-50 p-6">Randevular yüklenemedi.<button onClick={reset} className="ml-3 rounded border px-3 py-2">Tekrar Dene</button></div></main>}

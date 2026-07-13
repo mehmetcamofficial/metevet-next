@@ -1,0 +1,1 @@
+export default function Loading(){return <main className="min-h-screen bg-[#f4f0e8] p-8" aria-busy="true"><div className="h-9 w-52 animate-pulse rounded bg-black/10"/><div className="mt-8 h-80 animate-pulse rounded-2xl bg-white"/><span className="sr-only">Randevular yükleniyor</span></main>}
