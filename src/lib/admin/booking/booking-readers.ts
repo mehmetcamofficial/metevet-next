@@ -39,7 +39,7 @@ export async function getVeterinarianAvailability(s: SupabaseClient<Database>, v
 export async function getUpcomingClosures(s: SupabaseClient<Database>) {
   return s
     .from("clinic_closures")
-    .select("id,title,starts_at,ends_at,closure_type,affects_all_veterinarians,veterinarian_id,notes")
+    .select("id,title,starts_at,ends_at,closure_type,affects_all_veterinarians,veterinarian_id")
     .is("archived_at", null)
     .gte("ends_at", new Date().toISOString())
     .order("starts_at");
@@ -80,26 +80,69 @@ export async function countUpcomingClosures(s: SupabaseClient<Database>) {
   return count ?? 0;
 }
 
-/**
- * Authorization gate helpers — throw if role lacks required permission.
- */
-
-export function requireServiceManagement(role: string): void {
-  if (role !== "admin")
-    throw new Error("Hizmet yönetimi yalnızca yönetici tarafından yapılabilir.");
+export async function getAllServices(s: SupabaseClient<Database>) {
+  return s
+    .from("appointment_services")
+    .select("id,name_tr,name_en,slug,duration_minutes,buffer_before_minutes,buffer_after_minutes,is_online_bookable,requires_manual_confirmation,is_active,sort_order,archived_at")
+    .order("sort_order");
 }
 
-export function requireAvailabilityManagement(role: string): void {
-  if (role !== "admin")
-    throw new Error("Uygunluk yönetimi yetkiniz bulunmuyor.");
+export async function getServiceById(s: SupabaseClient<Database>, id: string) {
+  return s
+    .from("appointment_services")
+    .select("*")
+    .eq("id", id)
+    .single();
 }
 
-export function requireClosureManagement(role: string): void {
-  if (role !== "admin")
-    throw new Error("Kapatma yönetimi yalnızca yönetici tarafından yapılabilir.");
+export async function getActiveVeterinarians(s: SupabaseClient<Database>) {
+  return s
+    .from("profiles")
+    .select("id,full_name")
+    .eq("role", "veterinarian")
+    .eq("status", "active");
 }
 
-export function requireBookingRuleManagement(role: string): void {
-  if (role !== "admin")
-    throw new Error("Rezervasyon kural yönetimi yalnızca yönetici tarafından yapılabilir.");
+export async function countActiveVeterinarians(s: SupabaseClient<Database>) {
+  const { count } = await s
+    .from("profiles")
+    .select("id", { count: "exact", head: true })
+    .eq("role", "veterinarian")
+    .eq("status", "active");
+  return count ?? 0;
+}
+
+export async function countOnlineBookableServices(s: SupabaseClient<Database>) {
+  const { count } = await s
+    .from("appointment_services")
+    .select("id", { count: "exact", head: true })
+    .eq("is_online_bookable", true)
+    .eq("is_active", true)
+    .is("archived_at", null);
+  return count ?? 0;
+}
+
+export async function getClosureById(s: SupabaseClient<Database>, id: string) {
+  return s
+    .from("clinic_closures")
+    .select("*")
+    .eq("id", id)
+    .single();
+}
+
+export async function getAllClosures(s: SupabaseClient<Database>) {
+  return s
+    .from("clinic_closures")
+    .select("id,title,starts_at,ends_at,closure_type,affects_all_veterinarians,veterinarian_id,notes,archived_at")
+    .order("starts_at", { ascending: false });
+}
+
+export async function getCurrentlyActiveClosures(s: SupabaseClient<Database>) {
+  const now = new Date().toISOString();
+  return s
+    .from("clinic_closures")
+    .select("id,title,starts_at,ends_at,closure_type")
+    .is("archived_at", null)
+    .lte("starts_at", now)
+    .gte("ends_at", now);
 }
