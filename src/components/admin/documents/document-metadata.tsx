@@ -1,0 +1,1 @@
+export function DocumentMetadata({items}:{items:Array<[string,React.ReactNode]>}){return <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{items.map(([label,value])=><div key={label}><dt className="text-sm text-[#526a64]">{label}</dt><dd className="mt-1 font-medium">{value}</dd></div>)}</dl>}

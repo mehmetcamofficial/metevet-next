@@ -1,0 +1,1 @@
+import{documentTypes}from"./document-types";import type{DocumentType}from"@/src/types/database";export function isDocumentType(value:string):value is DocumentType{return documentTypes.includes(value as DocumentType)}export function safeLanguage(value:string):"tr"|"en"{return value==="en"?"en":"tr"}

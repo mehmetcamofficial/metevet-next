@@ -1,0 +1,1 @@
+export function EmptyAnalyticsState(){return <div className="rounded-xl bg-[#f4f0e8] p-6 text-center"><h3 className="font-semibold">Bu dönemde veri yok</h3><p className="mt-1 text-sm text-[#526a64]">Seçilen tarih aralığında kayıt bulunamadı.</p></div>}

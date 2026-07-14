@@ -1,0 +1,1 @@
+export function aggregatedCsv(title:string,range:{startDate:string;endDate:string},metrics:Record<string,string|number>){const safe=(v:string|number)=>`"${String(v).replaceAll('"','""')}"`;return[`Rapor,${safe(title)}`,`Başlangıç,${safe(range.startDate)}`,`Bitiş,${safe(range.endDate)}`,'Metrik,Değer',...Object.entries(metrics).map(([k,v])=>`${safe(k)},${safe(v)}`)].join('\r\n')}

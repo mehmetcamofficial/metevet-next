@@ -1,0 +1,1 @@
+export function sanitizeDocumentFileName(value:string){const ascii=value.normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/ı/g,"i").replace(/İ/g,"I").replace(/[^a-zA-Z0-9._-]+/g,"-").replace(/^-+|-+$/g,"").slice(0,100);return`${ascii||"metevet-belge"}.pdf`.replace(/\.pdf\.pdf$/,".pdf")}

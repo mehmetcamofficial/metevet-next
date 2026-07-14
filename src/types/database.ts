@@ -16,6 +16,8 @@ export type AppointmentStatus =
 export type ReminderStatus = "pending" | "ready" | "sent" | "cancelled" | "failed";
 export type ReminderType = "appointment_upcoming" | "appointment_same_day" | "vaccine_due" | "vaccine_overdue" | "parasite_due" | "parasite_overdue" | "follow_up_due" | "custom";
 export type ReminderChannel = "whatsapp" | "sms" | "email" | "internal";
+export type DocumentType = "examination_summary"|"vaccination_card"|"parasite_summary"|"preventive_care_history"|"appointment_summary"|"pet_health_summary"|"follow_up_instructions"|"custom_clinical_note";
+export type DocumentStatus = "generated"|"archived"|"failed";
 export type PetSex = "female" | "male" | "unknown";
 export type AppointmentSource = "website" | "plandok" | "whatsapp" | "phone" | "walk_in" | "admin";
 
@@ -215,6 +217,12 @@ export type Database = {
         Row: TimestampColumns & { id: string; key: string; name: string; channel: ReminderChannel; language: string; subject: string | null; body: string; is_active: boolean };
         Insert: { id?: string; key: string; name: string; channel: ReminderChannel; language: string; subject?: string | null; body: string; is_active?: boolean; created_at?: string; updated_at?: string };
         Update: Partial<Database["public"]["Tables"]["reminder_templates"]["Insert"]>;
+        Relationships: [];
+      };
+      generated_documents: {
+        Row: TimestampColumns & { id:string;document_type:DocumentType;owner_id:string|null;pet_id:string|null;appointment_id:string|null;examination_id:string|null;generated_by:string;title:string;language:"tr"|"en";status:DocumentStatus;file_name:string;storage_path:string|null;checksum:string|null;metadata:Json;generated_at:string;archived_at:string|null };
+        Insert: { id?:string;document_type:DocumentType;owner_id?:string|null;pet_id?:string|null;appointment_id?:string|null;examination_id?:string|null;generated_by:string;title:string;language?:"tr"|"en";status?:DocumentStatus;file_name:string;storage_path?:string|null;checksum?:string|null;metadata?:Json;generated_at?:string;archived_at?:string|null;created_at?:string;updated_at?:string };
+        Update: Partial<Database["public"]["Tables"]["generated_documents"]["Insert"]>;
         Relationships: [];
       };
       audit_logs: {

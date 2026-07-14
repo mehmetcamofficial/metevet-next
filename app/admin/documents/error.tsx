@@ -1,0 +1,1 @@
+"use client";export default function ErrorPage({reset}:{reset:()=>void}){return <div role="alert" className="rounded-xl bg-white p-8"><h2 className="font-semibold">Belgeler yüklenemedi</h2><button onClick={reset} className="mt-4 rounded border px-4 py-2">Tekrar dene</button></div>}

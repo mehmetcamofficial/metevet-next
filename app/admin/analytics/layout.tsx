@@ -1,0 +1,1 @@
+import type{ReactNode}from"react";import{requireStaff}from"@/src/lib/auth/require-staff";import{AnalyticsNavigation}from"@/src/components/admin/analytics/analytics-navigation";export default async function Layout({children}:{children:ReactNode}){const session=await requireStaff();return <><div className="mb-6"><AnalyticsNavigation role={session.profile.role}/></div>{children}</>}

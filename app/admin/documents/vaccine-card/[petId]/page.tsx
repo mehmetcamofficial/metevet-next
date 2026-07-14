@@ -1,0 +1,1 @@
+import{SourceDocumentPreview}from"@/src/components/admin/documents/source-document-preview";export default async function Page({params}:{params:Promise<{petId:string}>}){const{petId}=await params;return <SourceDocumentPreview type="vaccination_card" sourceId={petId}/>}

@@ -1,0 +1,1 @@
+import{SourceDocumentPreview}from"@/src/components/admin/documents/source-document-preview";export default async function Page({params}:{params:Promise<{id:string}>}){const{id}=await params;return <SourceDocumentPreview type="examination_summary" sourceId={id}/>}

@@ -9,6 +9,7 @@ import { appointmentDuration, serviceLabels, sourceLabels } from "@/src/lib/admi
 import { canPermanentlyDelete, canWriteClinicalRecords } from "@/src/lib/admin/permissions";
 import { requireStaff } from "@/src/lib/auth/require-staff";
 import { createClient } from "@/src/lib/supabase/server";
+import { DocumentCreateLinks } from "@/src/components/admin/documents/entity-documents";
 
 const dt = (value: string) => new Intl.DateTimeFormat("tr-TR", { timeZone: "Europe/Istanbul", dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 export default async function Detail({ params }: { params: Promise<{ id: string }> }) {
@@ -23,6 +24,7 @@ export default async function Detail({ params }: { params: Promise<{ id: string 
     <section className="mt-6 grid gap-6 lg:grid-cols-2"><div className="rounded-2xl bg-white p-6"><h2 className="font-semibold">Randevu Nedeni</h2><p className="mt-3 whitespace-pre-wrap text-sm text-[#526a64]">{appointment.reason ?? "Belirtilmemiş."}</p><h2 className="mt-6 font-semibold">Dahili Notlar</h2><p className="mt-3 whitespace-pre-wrap text-sm text-[#526a64]">{appointment.internal_notes ?? "Not yok."}</p></div><div className="rounded-2xl bg-white p-6"><h2 className="font-semibold">Audit Aktivitesi</h2><ul className="mt-3 space-y-2 text-sm">{logs.data?.map((log) => <li key={log.id} className="flex justify-between gap-3 border-b py-2"><span>{log.action}</span><time>{dt(log.created_at)}</time></li>)}</ul></div></section>
     <AppointmentExamination appointmentId={id} petId={appointment.pet_id} role={session.profile.role}/>
     {canPermanentlyDelete(session.profile.role) ? <section className="mt-6 rounded-2xl bg-white p-6"><ConfirmDialog danger title="Randevuyu kalıcı sil" description="Bu işlem geri alınamaz." triggerLabel="Kalıcı Sil" confirmLabel="Kalıcı Sil" action={deleteAppointment.bind(null, id)}/></section> : null}
+    <DocumentCreateLinks links={[{label:"Randevu Özeti Oluştur",type:"appointment_summary",source:id,preview:`/admin/documents/appointment/${id}`}]}/>
   </AdminShell>;
 }
 function Item({ label, children }: { label: string; children: React.ReactNode }) { return <div><dt className="text-xs font-semibold uppercase text-[#526a64]">{label}</dt><dd className="mt-1">{children}</dd></div>; }

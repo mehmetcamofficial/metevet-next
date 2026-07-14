@@ -10,6 +10,8 @@ const shared = [
   { href: "/admin/examinations", label: "Muayeneler" },
   { href: "/admin/vaccines", label: "Aşılar" }, { href: "/admin/parasites", label: "Parazit Takibi" },
   { href: "/admin/reminders", label: "Hatırlatmalar" },
+  { href: "/admin/documents", label: "Belgeler" },
+  { href: "/admin/analytics", label: "Analitik" },
 ];
 const comingSoon: Record<UserRole, string[]> = {
   admin: ["Personel", "Ayarlar", "Audit Log"], veterinarian: ["Aşı Takibi"], staff: [],

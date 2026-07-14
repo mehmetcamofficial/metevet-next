@@ -11,6 +11,7 @@ import { createClient } from "@/src/lib/supabase/server";
 import { PetExaminationHistory } from "@/src/components/admin/examinations/pet-examination-history";
 import { PetPreventiveCare } from "@/src/components/admin/vaccines/pet-preventive-care";
 import { EntityReminders } from "@/src/components/admin/reminders/entity-reminders";
+import { DocumentCreateLinks, RecentDocuments } from "@/src/components/admin/documents/entity-documents";
 
 const date = (value: string) => new Intl.DateTimeFormat("tr-TR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 const sexLabels = { female: "Dişi", male: "Erkek", unknown: "Bilinmiyor" } as const;
@@ -24,6 +25,8 @@ export default async function PetDetailPage({ params }: { params: Promise<{ id: 
     <PetExaminationHistory petId={id} role={session.profile.role} />
     <PetPreventiveCare petId={id} role={session.profile.role} />
     <EntityReminders ownerId={pet.owner_id} petId={id} />
+    <DocumentCreateLinks links={[{label:"Aşı Karnesi Oluştur",type:"vaccination_card",source:id,preview:`/admin/documents/vaccine-card/${id}`},{label:"Koruyucu Sağlık Özeti",type:"preventive_care_history",source:id,preview:`/admin/documents/preventive-care/${id}`},{label:"Hayvan Sağlık Özeti",type:"pet_health_summary",source:id,preview:`/admin/documents/pet-summary/${id}`}]}/>
+    <RecentDocuments petId={id} />
   </AdminShell>;
 }
 function Item({ label, children }: { label: string; children: React.ReactNode }) { return <div><dt className="text-xs font-semibold uppercase tracking-wider text-[#526a64]">{label}</dt><dd className="mt-1">{children}</dd></div>; }

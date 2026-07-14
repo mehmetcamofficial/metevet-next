@@ -1,0 +1,1 @@
+import{randomBytes}from"node:crypto";export function createDocumentNumber(now=new Date(),suffix=randomBytes(4).toString("hex").toUpperCase()){const day=new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Istanbul"}).format(now).replaceAll("-","");return`MV-${day}-${suffix.slice(0,8).padEnd(8,"0")}`}

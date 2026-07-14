@@ -1,0 +1,1 @@
+export function MetricCard({label,value,detail}:{label:string;value:string|number;detail?:string}){return <article className="rounded-2xl border border-[#0d2922]/10 bg-white p-5"><p className="text-sm text-[#526a64]">{label}</p><p className="mt-2 text-3xl font-semibold text-[#0d2922]">{value}</p>{detail?<p className="mt-2 text-xs text-[#526a64]">{detail}</p>:null}</article>}

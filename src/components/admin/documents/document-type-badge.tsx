@@ -1,0 +1,1 @@
+import type{DocumentType}from"@/src/types/database";import{documentTypeLabels}from"@/src/lib/admin/documents/document-types";export function DocumentTypeBadge({type}:{type:DocumentType}){return <span className="rounded-full bg-[#cda85f]/20 px-2.5 py-1 text-xs font-semibold text-[#594319]">{documentTypeLabels[type]}</span>}
