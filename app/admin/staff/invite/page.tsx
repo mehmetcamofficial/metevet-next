@@ -1,0 +1,1 @@
+import{InviteForm}from"@/src/components/admin/personnel/invite-form";import{requireAdmin}from"@/src/lib/auth/require-admin";export default async function Page(){await requireAdmin();return <><h1 className="text-3xl font-semibold">Personel Davet Et</h1><p className="my-4 text-[#526a64]">Personel şifresini güvenli davet bağlantısından kendisi belirler.</p><InviteForm/></>}

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { createClient } from "@/src/lib/supabase/server";
 import type { UserRole } from "@/src/types/database";
@@ -11,6 +11,7 @@ export type StaffSession = AuthenticatedUser & {
   profile: {
     fullName: string;
     role: UserRole;
+    status: "active";
   };
 };
 
@@ -24,16 +25,17 @@ export async function requireStaff(): Promise<StaffSession> {
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("full_name, role")
+    .select("full_name, role, status")
     .eq("id", user.id)
     .single();
 
   if (error || !data) {
     notFound();
   }
+  if (data.status !== "active") redirect("/admin/login?account=inactive");
 
   return {
     ...user,
-    profile: { fullName: data.full_name, role: data.role },
+    profile: { fullName: data.full_name, role: data.role, status: "active" },
   };
 }
