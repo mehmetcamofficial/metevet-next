@@ -1,16 +1,19 @@
 import Link from "next/link";
 
+import { canGenerateDocument } from "@/src/lib/admin/documents/document-permissions";
 import { createClient } from "@/src/lib/supabase/server";
-import type { DocumentType } from "@/src/types/database";
+import type { DocumentType, UserRole } from "@/src/types/database";
 
 import { DocumentStatusBadge } from "./document-status-badge";
 import { DocumentTypeBadge } from "./document-type-badge";
 
-export function DocumentCreateLinks({ links }: { links: Array<{ label: string; type: DocumentType; source: string; preview?: string }> }) {
+export function DocumentCreateLinks({ links, role }: { links: Array<{ label: string; type: DocumentType; source: string; preview?: string }>; role: UserRole }) {
+  const visible = links.filter((item) => canGenerateDocument(role, item.type));
+  if (!visible.length) return null;
   return <section className="mt-6 rounded-2xl bg-white p-6">
     <h2 className="text-xl font-semibold">Belgeler</h2>
     <div className="mt-4 flex flex-wrap gap-3">
-      {links.map((item) => <div key={`${item.type}-${item.source}`} className="flex items-center gap-2">
+      {visible.map((item) => <div key={`${item.type}-${item.source}`} className="flex items-center gap-2">
         <Link href={`/admin/documents/generate?type=${item.type}&source=${item.source}`} className="rounded border px-4 py-2 text-sm font-medium">{item.label}</Link>
         {item.preview ? <Link href={item.preview} className="text-sm underline">Önizle</Link> : null}
       </div>)}

@@ -25,7 +25,7 @@ export default async function PetDetailPage({ params }: { params: Promise<{ id: 
     <PetExaminationHistory petId={id} role={session.profile.role} />
     <PetPreventiveCare petId={id} role={session.profile.role} />
     <EntityReminders ownerId={pet.owner_id} petId={id} />
-    <DocumentCreateLinks links={[{label:"Aşı Karnesi Oluştur",type:"vaccination_card",source:id,preview:`/admin/documents/vaccine-card/${id}`},{label:"Koruyucu Sağlık Özeti",type:"preventive_care_history",source:id,preview:`/admin/documents/preventive-care/${id}`},{label:"Hayvan Sağlık Özeti",type:"pet_health_summary",source:id,preview:`/admin/documents/pet-summary/${id}`}]}/>
+    <DocumentCreateLinks role={session.profile.role} links={[{label:"Aşı Karnesi Oluştur",type:"vaccination_card",source:id,preview:`/admin/documents/vaccine-card/${id}`},{label:"Koruyucu Sağlık Özeti",type:"preventive_care_history",source:id,preview:`/admin/documents/preventive-care/${id}`},{label:"Hayvan Sağlık Özeti",type:"pet_health_summary",source:id,preview:`/admin/documents/pet-summary/${id}`}]}/>
     <RecentDocuments petId={id} />
   </AdminShell>;
 }
