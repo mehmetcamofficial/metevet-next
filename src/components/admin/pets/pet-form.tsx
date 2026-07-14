@@ -10,11 +10,11 @@ type OwnerOption = { id: string; full_name: string; phone: string };
 const initialState: PetFormState = { message: null };
 const fieldClass = "mt-2 min-h-11 w-full rounded-lg border border-[#0d2922]/20 bg-white px-3 py-2 focus:border-[#0d2922] focus:outline-none focus:ring-2 focus:ring-[#cda85f]/40";
 
-export function PetForm({ action, pet, owners, submitLabel }: { action: (state: PetFormState, formData: FormData) => Promise<PetFormState>; pet?: Pet; owners: OwnerOption[]; submitLabel: string }) {
+export function PetForm({ action, pet, owners, submitLabel, initialOwnerId }: { action: (state: PetFormState, formData: FormData) => Promise<PetFormState>; pet?: Pet; owners: OwnerOption[]; submitLabel: string; initialOwnerId?: string }) {
   const [state, formAction, pending] = useActionState(action, initialState);
   return <form action={formAction} className="space-y-6" noValidate>
     <div className="grid gap-5 sm:grid-cols-2">
-      <Field label="Hayvan Sahibi" name="ownerId" error={state.errors?.ownerId}><select className={fieldClass} id="ownerId" name="ownerId" defaultValue={pet?.owner_id ?? ""} required><option value="">Seçiniz</option>{owners.map((owner) => <option key={owner.id} value={owner.id}>{owner.full_name} · {owner.phone}</option>)}</select></Field>
+      <Field label="Hayvan Sahibi" name="ownerId" error={state.errors?.ownerId}><select className={fieldClass} id="ownerId" name="ownerId" defaultValue={pet?.owner_id ?? initialOwnerId ?? ""} required><option value="">Seçiniz</option>{owners.map((owner) => <option key={owner.id} value={owner.id}>{owner.full_name} · {owner.phone}</option>)}</select></Field>
       <Field label="Hayvan Adı" name="name" error={state.errors?.name}><input className={fieldClass} id="name" name="name" defaultValue={pet?.name} required /></Field>
       <Field label="Tür" name="species" error={state.errors?.species}><select className={fieldClass} id="species" name="species" defaultValue={pet?.species ?? ""} required><option value="">Seçiniz</option>{speciesOptions.map((species) => <option key={species} value={species}>{speciesLabels[species]}</option>)}</select></Field>
       <Field label="Irk (isteğe bağlı)" name="breed"><input className={fieldClass} id="breed" name="breed" defaultValue={pet?.breed ?? ""} /></Field>

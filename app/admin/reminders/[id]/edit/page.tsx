@@ -1,1 +1,14 @@
-import{notFound}from"next/navigation";import{updateReminder}from"../../actions";import{ReminderForm}from"@/src/components/admin/reminders/reminder-form";import{requireStaff}from"@/src/lib/auth/require-staff";import{createClient}from"@/src/lib/supabase/server";import{canManageReminders}from"@/src/lib/admin/reminders/reminder-permissions";function local(v:string){const d=new Date(v);return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16)}export default async function Page({params}:{params:Promise<{id:string}>}){const{id}=await params,session=await requireStaff();if(!canManageReminders(session.profile.role))notFound();const s=await createClient();if(!s)notFound();const[x,o,p]=await Promise.all([s.from("reminders").select("*").eq("id",id).single(),s.from("owners").select("id,full_name").is("archived_at",null),s.from("pets").select("id,name,owner_id").is("archived_at",null)]);if(!x.data||!["pending","ready","failed"].includes(x.data.status))notFound();return <><h1 className="text-3xl font-semibold">Hatırlatmayı Düzenle</h1><ReminderForm action={updateReminder.bind(null,id)} owners={o.data??[]} pets={p.data??[]} initial={{ownerId:x.data.owner_id,petId:x.data.pet_id,reminderType:x.data.reminder_type,channel:x.data.channel,scheduledFor:local(x.data.scheduled_for),renderedMessage:x.data.rendered_message}}/></>}
+import { notFound } from "next/navigation";
+import { updateReminder } from "../../actions";
+import { ReminderForm } from "@/src/components/admin/reminders/reminder-form";
+import { istanbulParts } from "@/src/lib/admin/appointments";
+import { canManageReminders } from "@/src/lib/admin/reminders/reminder-permissions";
+import { requireStaff } from "@/src/lib/auth/require-staff";
+import { createClient } from "@/src/lib/supabase/server";
+
+export default async function Page({params}:{params:Promise<{id:string}>}) {
+  const{id}=await params,session=await requireStaff();if(!canManageReminders(session.profile.role))notFound();const s=await createClient();if(!s)notFound();
+  const[x,owners,pets]=await Promise.all([s.from("reminders").select("*").eq("id",id).single(),s.from("owners").select("id,full_name"),s.from("pets").select("id,name,owner_id")]);
+  if(!x.data||!["pending","ready","failed"].includes(x.data.status))notFound();const local=istanbulParts(x.data.scheduled_for);
+  return <><h1 className="text-3xl font-semibold">Hatırlatmayı Düzenle</h1><ReminderForm action={updateReminder.bind(null,id)} owners={owners.data??[]} pets={pets.data??[]} relationshipLocked initial={{ownerId:x.data.owner_id,petId:x.data.pet_id,reminderType:x.data.reminder_type,channel:x.data.channel,scheduledFor:`${local.date}T${local.time}`,renderedMessage:x.data.rendered_message}}/></>;
+}

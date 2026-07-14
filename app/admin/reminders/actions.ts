@@ -5,6 +5,7 @@ import { requireStaff } from "@/src/lib/auth/require-staff";
 import { createClient } from "@/src/lib/supabase/server";
 import { canDeleteReminders, canManageReminders } from "@/src/lib/admin/reminders/reminder-permissions";
 import { canTransitionReminder } from "@/src/lib/admin/reminders/reminder-status";
+import { istanbulDateTimeLocalToIso } from "@/src/lib/admin/appointments";
 import { generateReminderBatch } from "@/src/lib/admin/reminders/generate-reminders";
 import type { ReminderChannel, ReminderStatus, ReminderType } from "@/src/types/database";
 
@@ -13,11 +14,11 @@ const channels=["whatsapp","sms","email","internal"];
 async function save(id:string|null,_state:ReminderFormState,fd:FormData):Promise<ReminderFormState>{
   const session=await requireStaff();if(!canManageReminders(session.profile.role))return{message:"Bu işlem için yetkiniz bulunmuyor."};const s=await createClient();if(!s)return{message:"İşlem tamamlanamadı."};
   const ownerId=String(fd.get("ownerId")??""),petId=String(fd.get("petId")??"")||null,type=String(fd.get("reminderType")??""),channel=String(fd.get("channel")??""),scheduled=String(fd.get("scheduledFor")??""),message=String(fd.get("renderedMessage")??"").trim()||null;
-  const errors:Record<string,string>={};if(type!=="custom")errors.reminderType="Kaynak tabanlı türler yalnızca otomatik üretilebilir.";if(!channels.includes(channel))errors.channel="Geçerli kanal seçin.";if(!scheduled||Number.isNaN(Date.parse(scheduled)))errors.scheduledFor="Geçerli tarih seçin.";
+  const scheduledIso=istanbulDateTimeLocalToIso(scheduled),errors:Record<string,string>={};if(!ownerId)errors.ownerId="Hayvan sahibi zorunludur.";if(!petId)errors.petId="Hayvan zorunludur.";if(type!=="custom")errors.reminderType="Kaynak tabanlı türler yalnızca otomatik üretilebilir.";if(!channels.includes(channel))errors.channel="Geçerli kanal seçin.";if(!scheduledIso)errors.scheduledFor="Geçerli tarih seçin.";
   const [owner,pet]=await Promise.all([s.from("owners").select("id,full_name,phone,email").eq("id",ownerId).is("archived_at",null).single(),petId?s.from("pets").select("id,owner_id").eq("id",petId).is("archived_at",null).single():Promise.resolve({data:null})]);
   if(!owner.data)errors.ownerId="Geçerli hayvan sahibi seçin.";if(petId&&(!pet.data||pet.data.owner_id!==ownerId))errors.petId="Hayvan bu kişiye ait değil.";if(Object.keys(errors).length)return{message:"Alanları düzeltin.",errors};
-  const record={owner_id:ownerId,pet_id:petId,reminder_type:type as ReminderType,channel:channel as ReminderChannel,scheduled_for:new Date(scheduled).toISOString(),recipient_name:owner.data!.full_name,recipient_phone:owner.data!.phone,recipient_email:owner.data!.email,rendered_message:message,created_by:session.id};
-  const result=id?await s.from("reminders").update(record).eq("id",id).in("status",["pending","ready","failed"]).select("id,status").single():await s.from("reminders").insert(record).select("id,status").single();if(result.error||!result.data)return{message:"İşlem tamamlanamadı."};
+  const record={owner_id:ownerId,pet_id:petId,reminder_type:type as ReminderType,channel:channel as ReminderChannel,scheduled_for:scheduledIso!,recipient_name:owner.data!.full_name,recipient_phone:owner.data!.phone,recipient_email:owner.data!.email,rendered_message:message,created_by:session.id};
+  const result=id?await s.from("reminders").update({channel:record.channel,scheduled_for:record.scheduled_for,rendered_message:record.rendered_message}).eq("id",id).in("status",["pending","ready","failed"]).select("id,status").single():await s.from("reminders").insert(record).select("id,status").single();if(result.error||!result.data)return{message:"İşlem tamamlanamadı."};
   await s.from("audit_logs").insert({actor_user_id:session.id,action:id?"reminder_updated":"reminder_created",entity_type:"reminder",entity_id:result.data.id,metadata:{reminder_type:type,channel,scheduled_time:record.scheduled_for}});revalidatePath("/admin/reminders");redirect(`/admin/reminders/${result.data.id}`);
 }
 export async function createReminder(s:ReminderFormState,f:FormData){return save(null,s,f)}export async function updateReminder(id:string,s:ReminderFormState,f:FormData){return save(id,s,f)}

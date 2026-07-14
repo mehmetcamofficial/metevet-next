@@ -17,6 +17,10 @@ export function istanbulLocalToIso(date: string, time: string) {
   const value = new Date(`${date}T${time}:00+03:00`);
   return Number.isNaN(value.getTime()) ? null : value.toISOString();
 }
+export function istanbulDateTimeLocalToIso(value: string) {
+  const match = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})$/.exec(value);
+  return match ? istanbulLocalToIso(match[1], match[2]) : null;
+}
 export function istanbulParts(value: string) {
   const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Istanbul", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date(value));
   const map = Object.fromEntries(parts.map((part) => [part.type, part.value]));
