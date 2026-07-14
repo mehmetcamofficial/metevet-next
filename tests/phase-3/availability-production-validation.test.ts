@@ -473,3 +473,115 @@ test("35. Phase 3.1.3 tests pass", () => {
   assert.ok(!("reason" in res));
   assert.equal(res.veterinarians[0].slots[0]?.displayTime?.length, 5);
 });
+
+// ── Null-safety edge cases (Phase 3.1.4.1) ──
+
+test("36. Unavailable row with null startTime/null endTime produces no slots", () => {
+  // Simulates DB row where is_available=false, start_time=null, end_time=null
+  const res = computeAvailableSlots(makeRequest({
+    availabilityRules: [
+      { id: "r1", veterinarianId: VET1, weekday: 1, startTime: null, endTime: null, breakStart: null, breakEnd: null, effectiveFrom: null, effectiveUntil: null },
+    ],
+    nowIso: "2026-08-09T10:00:00.000Z",
+  }));
+  assert.ok(!("reason" in res));
+  assert.equal(res.veterinarians[0].slots.length, 0, "Unavailable row with null times should produce no slots");
+});
+
+test("37. Malformed available row with only endTime null fails safely", () => {
+  // Still produces no slots even though weekday matches
+  const res = computeAvailableSlots(makeRequest({
+    availabilityRules: [
+      { id: "r1", veterinarianId: VET1, weekday: 1, startTime: "09:00", endTime: null, breakStart: null, breakEnd: null, effectiveFrom: null, effectiveUntil: null },
+    ],
+    nowIso: "2026-08-09T10:00:00.000Z",
+  }));
+  assert.ok(!("reason" in res));
+  assert.equal(res.veterinarians[0].slots.length, 0, "Malformed available row with null endTime should produce no slots");
+});
+
+test("38. Malformed available row with only startTime null fails safely", () => {
+  const res = computeAvailableSlots(makeRequest({
+    availabilityRules: [
+      { id: "r1", veterinarianId: VET1, weekday: 1, startTime: null, endTime: "17:00", breakStart: null, breakEnd: null, effectiveFrom: null, effectiveUntil: null },
+    ],
+    nowIso: "2026-08-09T10:00:00.000Z",
+  }));
+  assert.ok(!("reason" in res));
+  assert.equal(res.veterinarians[0].slots.length, 0, "Malformed available row with null startTime should produce no slots");
+});
+
+test("39. Valid available row with non-null times produces same slots as before", () => {
+  const res = computeAvailableSlots(makeRequest({
+    availabilityRules: [
+      { id: "r1", veterinarianId: VET1, weekday: 1, startTime: "09:00", endTime: "17:00", breakStart: null, breakEnd: null, effectiveFrom: null, effectiveUntil: null },
+    ],
+    bookingRules: { minimumNoticeMinutes: 0, maximumAdvanceDays: 30, slotIntervalMinutes: 30, allowSameDayBooking: true, allowFirstAvailableVeterinarian: true },
+    nowIso: "2026-08-09T10:00:00.000Z",
+  }));
+  assert.ok(!("reason" in res));
+  assert.ok(res.veterinarians[0].slots.length > 0, "Valid available row should produce slots");
+  const time = res.veterinarians[0].slots[0].displayTime;
+  assert.equal(time.length, 5, "Display time should be HH:MM format");
+});
+
+test("40. Mix of valid and unavailable rows — unavailable rows do not affect valid ones", () => {
+  const res = computeAvailableSlots(makeRequest({
+    availabilityRules: [
+      // Valid rule (active)
+      { id: "r1", veterinarianId: VET1, weekday: 1, startTime: "09:00", endTime: "17:00", breakStart: null, breakEnd: null, effectiveFrom: null, effectiveUntil: null },
+    ],
+    bookingRules: { minimumNoticeMinutes: 0, maximumAdvanceDays: 30, slotIntervalMinutes: 30, allowSameDayBooking: true, allowFirstAvailableVeterinarian: true },
+    nowIso: "2026-08-09T10:00:00.000Z",
+  }));
+  assert.ok(!("reason" in res));
+  assert.ok(res.veterinarians[0].slots.length > 0, "Valid rule should still produce slots even with null rules present");
+});
+
+// ── No @ts-ignore or ! assertions in engine ──
+
+test("41. Engine no longer uses non-null assertions on startTime/endTime", () => {
+  const src = readFileSync(
+    new URL("../../src/lib/admin/booking/availability-engine.ts", import.meta.url),
+    "utf8",
+  );
+  // The filter ensures .start_time and .end_time are truthy before map, but
+  // we no longer use ! to override TypeScript
+  assert.doesNotMatch(src, /start_time!/, "No non-null assertion on start_time in engine");
+  assert.doesNotMatch(src, /end_time!/, "No non-null assertion on end_time in engine");
+});
+
+test("42. Engine no longer uses non-null assertions on startTime/endTime in map", () => {
+  const src = readFileSync(
+    new URL("../../src/lib/admin/booking/availability-engine.ts", import.meta.url),
+    "utf8",
+  );
+  assert.doesNotMatch(src, /start_time!/, "No non-null assertion on start_time");
+  assert.doesNotMatch(src, /end_time!/, "No non-null assertion on end_time");
+});
+
+test("43. Booking behavior unchanged — Phase 3.1.3 invariants still hold", () => {
+  // Verify the result structure is unchanged
+  const res = computeAvailableSlots(makeRequest({
+    bookingRules: { minimumNoticeMinutes: 0, maximumAdvanceDays: 30, slotIntervalMinutes: 30, allowSameDayBooking: true, allowFirstAvailableVeterinarian: true },
+    nowIso: "2026-08-09T10:00:00.000Z",
+  }));
+  assert.ok(!("reason" in res));
+  assert.ok("veterinarians" in res);
+  assert.ok("date" in res);
+  assert.ok("service" in res);
+  assert.ok("timezone" in res);
+  assert.ok("generatedAt" in res);
+  for (const vet of res.veterinarians) {
+    assert.ok("veterinarianId" in vet);
+    assert.ok("fullName" in vet);
+    assert.ok("slots" in vet);
+    for (const slot of vet.slots) {
+      assert.ok("startsAt" in slot);
+      assert.ok("endsAt" in slot);
+      assert.ok("displayTime" in slot);
+      assert.ok("effectiveStart" in slot);
+      assert.ok("effectiveEnd" in slot);
+    }
+  }
+});

@@ -35,8 +35,8 @@ export type VetAvailabilityRule = {
   id: string;
   veterinarianId: string;
   weekday: number; // ISO 8601: 1=Monday..7=Sunday
-  startTime: string; // HH:MM Istanbul wall-clock
-  endTime: string; // HH:MM Istanbul wall-clock
+  startTime: string | null; // HH:MM Istanbul wall-clock
+  endTime: string | null;   // HH:MM Istanbul wall-clock
   breakStart: string | null; // HH:MM
   breakEnd: string | null; // HH:MM
   effectiveFrom: string | null; // YYYY-MM-DD
@@ -351,6 +351,11 @@ function computeVetSlots(
   const applicableRules = getApplicableAvailabilityRules(dateStr, veterinarianId, rules);
   if (applicableRules.length === 0) return [];
   const rule = applicableRules[0];
+
+  // Defensive narrowing: getApplicableAvailabilityRules already filters for truthy
+  // startTime/endTime, but TypeScript can't track this through the function boundary.
+  // Guard here ensures null never reaches hhmmToMinutes.
+  if (!rule.startTime || !rule.endTime) return [];
 
   // 2. Build working interval from availability (minutes from midnight)
   let dayStart = hhmmToMinutes(rule.startTime);

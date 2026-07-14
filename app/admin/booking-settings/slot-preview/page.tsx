@@ -6,7 +6,7 @@ import {
   getActiveVeterinarians,
   getBookingRules,
 } from "@/src/lib/admin/booking/booking-readers";
-import { SlotPreviewForm } from "@/src/components/admin/booking/slot-preview-form";
+import { SlotPreviewPageClient } from "@/src/components/admin/booking/slot-preview-page-client";
 import Link from "next/link";
 
 export default async function SlotPreviewPage({
@@ -58,34 +58,14 @@ export default async function SlotPreviewPage({
         </p>
       </div>
 
-      <div className="mt-4 rounded-lg bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800">
-        <strong>Uyarı:</strong> Bu ekran yalnızca uygunluk önizlemesidir. Gösterilen saatler rezervasyon oluşturmaz ve kesin müsaitlik garantisi değildir.
-      </div>
-
-      <div className="mt-7 grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-1">
-          <section className="rounded-2xl bg-white p-6">
-            <h2 className="text-lg font-semibold">Hizmet ve Tarih Seçimi</h2>
-            <SlotPreviewForm
-              services={services}
-              veterinarians={vets}
-              rules={rules}
-              initialService={params.serviceId || ""}
-              initialVet={params.veterinarianId || ""}
-              initialDate={params.date || ""}
-            />
-          </section>
-        </div>
-
-        <div className="lg:col-span-2">
-          <section className="rounded-2xl bg-white p-6">
-            <h2 className="text-lg font-semibold">Uygun Saatler</h2>
-            <p className="mt-1 text-sm text-[#526a64]">
-              Seçilen hizmet ve tarihe göre hesaplanan uygun saatler aşağıda listelenir.
-            </p>
-          </section>
-        </div>
-      </div>
+      <SlotPreviewPageClient
+        services={services}
+        veterinarians={vets}
+        rules={rules}
+        initialService={params.serviceId || ""}
+        initialVet={params.veterinarianId || ""}
+        initialDate={params.date || ""}
+      />
     </AdminShell>
   );
 }

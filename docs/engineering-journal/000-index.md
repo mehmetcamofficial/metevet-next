@@ -12,3 +12,5 @@ Phase-by-phase record of design decisions, migration issues, and resolution rati
 | [033-R](033-phase-3-1-3-loop-report.md) | 3.1.3 | Loop Report — 20-section | 2026-07-25 |
 | [034](034-phase-3-1-4-availability-validation.md) | 3.1.4 | Availability Validation & Hardening — 7/10 DoD | 2026-07-25 |
 | [034-R](034-phase-3-1-4-loop-report.md) | 3.1.4 | Loop Report — 20-section | 2026-07-25 |
+| [035](035-phase-3-1-4-1-slot-preview-ux.md) | 3.1.4.1 | Slot Preview UX Refinement — pending DoD | 2026-07-15 |
+| [035-R](035-phase-3-1-4-1-loop-report.md) | 3.1.4.1 | Loop Report — 20-section | 2026-07-15 |
