@@ -1,0 +1,4 @@
+import{Font}from"@react-pdf/renderer";
+export const PDF_FONT_FAMILY="Noto Sans";
+const regular=decodeURIComponent(new URL("../../../assets/fonts/noto-sans/NotoSans-Regular.ttf",import.meta.url).pathname),medium=decodeURIComponent(new URL("../../../assets/fonts/noto-sans/NotoSans-Medium.ttf",import.meta.url).pathname),semibold=decodeURIComponent(new URL("../../../assets/fonts/noto-sans/NotoSans-SemiBold.ttf",import.meta.url).pathname),bold=decodeURIComponent(new URL("../../../assets/fonts/noto-sans/NotoSans-Bold.ttf",import.meta.url).pathname);let registered=false;
+export function registerPdfFonts(){if(registered)return;Font.register({family:PDF_FONT_FAMILY,fonts:[{src:regular,fontWeight:400},{src:medium,fontWeight:500},{src:semibold,fontWeight:600},{src:bold,fontWeight:700}]});Font.registerHyphenationCallback(word=>[word]);registered=true}

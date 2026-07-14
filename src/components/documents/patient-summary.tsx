@@ -1,1 +1,0 @@
-import{Text,View,StyleSheet}from"@react-pdf/renderer";const s=StyleSheet.create({box:{marginTop:14,padding:10,backgroundColor:"#F4F0E8",flexDirection:"row",justifyContent:"space-between"},text:{fontSize:9,color:"#0D2922"}});export function PatientSummary({petName}:{petName:string}){return <View style={s.box}><Text style={s.text}>Hayvan: {petName}</Text></View>}

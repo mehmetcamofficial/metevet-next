@@ -1,1 +1,131 @@
-import Link from"next/link";import{notFound}from"next/navigation";import{requireStaff}from"@/src/lib/auth/require-staff";import{createClient}from"@/src/lib/supabase/server";import{DocumentTypeBadge}from"@/src/components/admin/documents/document-type-badge";import{DocumentStatusBadge}from"@/src/components/admin/documents/document-status-badge";import{DocumentMetadata}from"@/src/components/admin/documents/document-metadata";import{DocumentActions}from"@/src/components/admin/documents/document-actions";import{DocumentPreview}from"@/src/components/admin/documents/document-preview";import{canArchiveDocument}from"@/src/lib/admin/documents/document-permissions";const dt=(v:string)=>new Intl.DateTimeFormat("tr-TR",{dateStyle:"medium",timeStyle:"short",timeZone:"Europe/Istanbul"}).format(new Date(v));export default async function Page({params}:{params:Promise<{id:string}>}){const{id}=await params,session=await requireStaff(),s=await createClient();if(!s)notFound();const[d,logs]=await Promise.all([s.from("generated_documents").select("*").eq("id",id).single(),s.from("audit_logs").select("id,action,created_at").eq("entity_type","generated_document").eq("entity_id",id).order("created_at",{ascending:false}).limit(20)]);if(!d.data)notFound();const x=d.data,[owner,pet,user]=await Promise.all([x.owner_id?s.from("owners").select("full_name").eq("id",x.owner_id).single():Promise.resolve({data:null}),x.pet_id?s.from("pets").select("name").eq("id",x.pet_id).single():Promise.resolve({data:null}),s.from("profiles").select("full_name").eq("id",x.generated_by).single()]);const source=x.examination_id?`/admin/examinations/${x.examination_id}`:x.appointment_id?`/admin/appointments/${x.appointment_id}`:x.pet_id?`/admin/pets/${x.pet_id}`:null;return <><div className="flex flex-wrap items-center gap-3"><h1 className="text-3xl font-semibold">{x.title}</h1><DocumentTypeBadge type={x.document_type}/><DocumentStatusBadge status={x.status}/></div><section className="mt-6 rounded-2xl bg-white p-6"><DocumentMetadata items={[["Belge adı",x.file_name],["Hayvan sahibi",owner.data?.full_name??"—"],["Hayvan",pet.data?.name??"—"],["Oluşturan",user.data?.full_name??"—"],["Üretim tarihi",dt(x.generated_at)],["Kaynak",source?<Link href={source} className="underline">Kaynak kayda git</Link>:"—"]]}/></section><div className="mt-6"><DocumentActions id={id} status={x.status} role={session.profile.role} canArchive={canArchiveDocument(session.profile.role,x.generated_by,session.id)}/></div><div className="mt-6"><DocumentPreview title={x.title}><p>PDF önizlemesi güvenli indirme bağlantısı üzerinden açılır. Kalıcı public URL oluşturulmaz.</p><a href={`/admin/documents/${id}/download`} target="_blank" rel="noopener noreferrer" className="mt-3 inline-block underline">Korumalı PDF’yi aç</a></DocumentPreview></div><section className="mt-6 rounded-2xl bg-white p-6"><h2 className="text-xl font-semibold">Audit Geçmişi</h2><ul className="mt-4 divide-y text-sm">{logs.data?.map(l=><li key={l.id} className="flex justify-between py-2"><span>{l.action}</span><time>{dt(l.created_at)}</time></li>)}</ul></section></>}
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { requireStaff } from "@/src/lib/auth/require-staff";
+import { createClient } from "@/src/lib/supabase/server";
+import { DocumentTypeBadge } from "@/src/components/admin/documents/document-type-badge";
+import { DocumentStatusBadge } from "@/src/components/admin/documents/document-status-badge";
+import { DocumentMetadata } from "@/src/components/admin/documents/document-metadata";
+import { DocumentActions } from "@/src/components/admin/documents/document-actions";
+import { DocumentPreview } from "@/src/components/admin/documents/document-preview";
+import { canArchiveDocument } from "@/src/lib/admin/documents/document-permissions";
+const dt = (v: string) =>
+  new Intl.DateTimeFormat("tr-TR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Europe/Istanbul",
+  }).format(new Date(v));
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params,
+    session = await requireStaff(),
+    s = await createClient();
+  if (!s) notFound();
+  const [d, logs] = await Promise.all([
+    s.from("generated_documents").select("*").eq("id", id).single(),
+    s
+      .from("audit_logs")
+      .select("id,action,created_at")
+      .eq("entity_type", "generated_document")
+      .eq("entity_id", id)
+      .order("created_at", { ascending: false })
+      .limit(20),
+  ]);
+  if (!d.data) notFound();
+  const x = d.data;
+  const examination = x.examination_id
+    ? await s.from("examinations").select("veterinarian_id").eq("id", x.examination_id).maybeSingle()
+    : { data: null };
+  const clinician = examination.data?.veterinarian_id
+    ? await s.from("profiles").select("full_name").eq("id", examination.data.veterinarian_id).maybeSingle()
+    : { data: null };
+  const
+    [owner, pet, user] = await Promise.all([
+      x.owner_id
+        ? s.from("owners").select("full_name").eq("id", x.owner_id).single()
+        : Promise.resolve({ data: null }),
+      x.pet_id
+        ? s.from("pets").select("name").eq("id", x.pet_id).single()
+        : Promise.resolve({ data: null }),
+      s.from("profiles").select("full_name").eq("id", x.generated_by).single(),
+    ]);
+  const source = x.examination_id
+    ? `/admin/examinations/${x.examination_id}`
+    : x.appointment_id
+      ? `/admin/appointments/${x.appointment_id}`
+      : x.pet_id
+        ? `/admin/pets/${x.pet_id}`
+        : null;
+  return (
+    <>
+      <div className="flex flex-wrap items-center gap-3">
+        <h1 className="text-3xl font-semibold">{x.title}</h1>
+        <DocumentTypeBadge type={x.document_type} />
+        <DocumentStatusBadge status={x.status} />
+      </div>
+      <section className="mt-6 rounded-2xl bg-white p-6">
+        <DocumentMetadata
+          items={[
+            ["Belge adı", x.file_name],
+            ["Hayvan sahibi", owner.data?.full_name ?? "—"],
+            ["Hayvan", pet.data?.name ?? "—"],
+            ["Veteriner Hekim", clinician.data?.full_name ?? "—"],
+            ["Oluşturan", user.data?.full_name ?? "—"],
+            ["Üretim tarihi", dt(x.generated_at)],
+            [
+              "Kaynak",
+              source ? (
+                <Link href={source} className="underline">
+                  Kaynak kayda git
+                </Link>
+              ) : (
+                "—"
+              ),
+            ],
+          ]}
+        />
+      </section>
+      <div className="mt-6">
+        <DocumentActions
+          id={id}
+          status={x.status}
+          role={session.profile.role}
+          canArchive={canArchiveDocument(
+            session.profile.role,
+            x.generated_by,
+            session.id,
+          )}
+        />
+      </div>
+      <div className="mt-6">
+        <DocumentPreview title={x.title}>
+          <p>
+            PDF önizlemesi güvenli indirme bağlantısı üzerinden açılır. Kalıcı
+            public URL oluşturulmaz.
+          </p>
+          <a
+            href={`/admin/documents/${id}/download`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-block underline"
+          >
+            Korumalı PDF’yi aç
+          </a>
+        </DocumentPreview>
+      </div>
+      <section className="mt-6 rounded-2xl bg-white p-6">
+        <h2 className="text-xl font-semibold">Audit Geçmişi</h2>
+        <ul className="mt-4 divide-y text-sm">
+          {logs.data?.map((l) => (
+            <li key={l.id} className="flex justify-between py-2">
+              <span>{l.action}</span>
+              <time>{dt(l.created_at)}</time>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </>
+  );
+}

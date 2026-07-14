@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { fetchDocumentData } from "@/src/lib/admin/documents/document-data";
-import { sanitizeDocumentFileName } from "@/src/lib/admin/documents/document-file-name";
+import { clinicalDocumentFileName } from "@/src/lib/admin/documents/document-file-name";
 import { generateClinicalPdf } from "@/src/lib/admin/documents/document-generator";
 import { createDocumentNumber } from "@/src/lib/admin/documents/document-number";
 import {
@@ -43,10 +43,10 @@ export async function generateDocument(
   const s = await createClient();
   if (!s) return { message: "Belge üretilemedi." };
   const reference = createDocumentNumber();
-  const fileName = sanitizeDocumentFileName(`${reference}-${type}`);
   let storagePath: string | null = null;
   try {
     const data = await fetchDocumentData(s, type, sourceId, reference, internal);
+    const fileName = clinicalDocumentFileName(reference, type, data.petName);
     const { buffer, checksum } = await generateClinicalPdf(data);
     if (session.profile.role !== "staff") {
       storagePath = clinicalDocumentPath(session.id, reference, fileName);
@@ -152,7 +152,7 @@ export async function regenerateDocument(id: string) {
   const reference = createDocumentNumber();
   const data = await fetchDocumentData(s, old.document_type, source, reference, false);
   const { buffer, checksum } = await generateClinicalPdf(data);
-  const fileName = sanitizeDocumentFileName(`${reference}-${old.document_type}`);
+  const fileName = clinicalDocumentFileName(reference, old.document_type, data.petName);
   let storagePath: string | null = null;
   try {
     if (session.profile.role !== "staff") {
