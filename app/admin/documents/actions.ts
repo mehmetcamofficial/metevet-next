@@ -126,8 +126,9 @@ export async function deleteDocument(id: string) {
   if (!canDeleteDocuments(session.profile.role)) throw new Error("Yetkiniz bulunmuyor.");
   const s = await createClient();
   if (!s) throw new Error("İşlem tamamlanamadı.");
-  const { data } = await s.from("generated_documents").select("document_type,file_name,storage_path").eq("id", id).single();
+  const { data } = await s.from("generated_documents").select("document_type,file_name,storage_path,status").eq("id", id).single();
   if (!data) throw new Error("Belge bulunamadı.");
+  if (data.status !== "archived") throw new Error("Belge kalıcı silme öncesinde arşivlenmelidir.");
   const backup = data.storage_path ? await downloadClinicalPdf(s, data.storage_path) : null;
   if (data.storage_path) await removeClinicalPdf(s, data.storage_path);
   const { error } = await s.from("generated_documents").delete().eq("id", id);
