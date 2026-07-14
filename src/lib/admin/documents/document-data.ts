@@ -196,6 +196,10 @@ export async function fetchDocumentData(
   let clinicalSummary: ClinicalDocumentData["clinicalSummary"] = null;
   const sections: DocumentSection[] = [];
 
+  // appointment_summary: intentionally limited to scheduling data only.
+  // Never queries examinations, vaccination_records, parasite_records, or
+  // owner private contact (phone, email, address).  Staff may generate this
+  // type — clinical findings require veterinarian authority.
   if (type === "appointment_summary") {
     const { data: appointment } = await s
       .from("appointments")

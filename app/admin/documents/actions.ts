@@ -13,6 +13,7 @@ import {
   canGenerateDocument,
   canIncludeInternalNotes,
 } from "@/src/lib/admin/documents/document-permissions";
+import { documentSourceKind } from "@/src/lib/admin/documents/document-source-policy";
 import {
   clinicalDocumentPath,
   downloadClinicalPdf,
@@ -46,6 +47,11 @@ export async function generateDocument(
   let storagePath: string | null = null;
   try {
     const data = await fetchDocumentData(s, type, sourceId, reference, internal);
+    const kind = documentSourceKind(type);
+    if (kind === "appointment" && !data.appointmentId)
+      return { message: "Kaynak türü eşleşmiyor." };
+    if (kind === "examination" && !data.examinationId)
+      return { message: "Kaynak türü eşleşmiyor." };
     const fileName = clinicalDocumentFileName(reference, type, data.petName);
     const { buffer, checksum } = await generateClinicalPdf(data);
     if (session.profile.role !== "staff") {

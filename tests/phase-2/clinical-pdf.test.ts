@@ -255,6 +255,17 @@ test("internal notes permission is revalidated server-side", () => {
   assert.match(x, /internal && !canIncludeInternalNotes/);
 });
 
+test("canIncludeInternalNotes is admin-only — staff and veterinarian denied", () => {
+  const src = read("src/lib/admin/documents/document-permissions.ts");
+  assert.match(src, /canIncludeInternalNotes.*role === "admin"/);
+});
+
+test("STAFF_ALLOWED_TYPE constant restricts staff to appointment_summary only", () => {
+  const src = read("src/lib/admin/documents/document-permissions.ts");
+  assert.match(src, /STAFF_ALLOWED_TYPE.*appointment_summary/);
+  assert.match(src, /CLINICAL_ROLES/);
+});
+
 // ── Authorization ──
 
 test("examination summary requires a final record", () =>

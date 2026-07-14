@@ -50,6 +50,18 @@ test("staff cannot generate unauthorized clinical documents", () => {
   assert.equal(canGenerateDocument("staff", "pet_health_summary"), false);
 });
 
+test("sourceCreateLink returns null for staff — no create-source navigation", () => {
+  const src = readFileSync(new URL("../../src/lib/admin/documents/document-source-policy.ts", import.meta.url), "utf8");
+  assert.match(src, /role === "staff"\) return null/);
+});
+
+test("generateDocument validates source kind as defense-in-depth", () => {
+  const src = readFileSync(new URL("../../app/admin/documents/actions.ts", import.meta.url), "utf8");
+  assert.match(src, /import.*documentSourceKind.*from.*document-source-policy/);
+  assert.match(src, /kind === "appointment" && !data\.appointmentId/);
+  assert.match(src, /kind === "examination" && !data\.examinationId/);
+});
+
 test("veterinarian document lifecycle excludes permanent deletion", () => {
   assert.equal(canArchiveDocument("veterinarian", "vet-1", "vet-1"), true);
   assert.equal(canArchiveDocument("veterinarian", "vet-2", "vet-1"), false);
