@@ -146,3 +146,53 @@ export async function getCurrentlyActiveClosures(s: SupabaseClient<Database>) {
     .lte("starts_at", now)
     .gte("ends_at", now);
 }
+
+// ═══════════════════════════════════════════════════════════
+// Engine data fetchers — bounded, field-limited, no PII
+// ═══════════════════════════════════════════════════════════
+
+export async function getEligibleService(s: SupabaseClient<Database>, serviceId: string) {
+  return s
+    .from("appointment_services")
+    .select("id,duration_minutes,buffer_before_minutes,buffer_after_minutes,name_tr")
+    .eq("id", serviceId)
+    .eq("is_active", true)
+    .eq("is_online_bookable", true)
+    .is("archived_at", null)
+    .maybeSingle();
+}
+
+export async function getApplicableAvailability(s: SupabaseClient<Database>, veterinarianId: string) {
+  return s
+    .from("veterinarian_availability")
+    .select("id,veterinarian_id,weekday,is_available,start_time,end_time,break_start,break_end,effective_from,effective_until")
+    .eq("veterinarian_id", veterinarianId);
+}
+
+export async function getIntersectingClosures(s: SupabaseClient<Database>, date: string) {
+  // Closures that intersect the given date (any part of the closure overlaps the day)
+  const nextDay = new Date(new Date(`${date}T00:00:00Z`).getTime() + 86400000).toISOString().slice(0, 10);
+  return s
+    .from("clinic_closures")
+    .select("id,starts_at,ends_at,affects_all_veterinarians,veterinarian_id")
+    .is("archived_at", null)
+    .lt("starts_at", `${nextDay}T00:00:00Z`)
+    .gt("ends_at", `${date}T00:00:00Z`);
+}
+
+export async function getBlockingAppointments(s: SupabaseClient<Database>, date: string) {
+  // Appointments on the given date with blocking statuses (pending, confirmed)
+  const nextDay = new Date(new Date(`${date}T00:00:00Z`).getTime() + 86400000).toISOString().slice(0, 10);
+  return s
+    .from("appointments")
+    .select("assigned_user_id,starts_at,ends_at")
+    .in("status", ["pending", "confirmed"])
+    .gte("starts_at", `${date}T00:00:00Z`)
+    .lt("starts_at", `${nextDay}T00:00:00Z`);
+}
+
+export async function getClinicBusinessHours(s: SupabaseClient<Database>) {
+  return s
+    .from("clinic_business_hours")
+    .select("weekday,is_open,opens_at,closes_at,break_starts_at,break_ends_at");
+}

@@ -353,20 +353,21 @@ test("booking-settings navigation item exists in admin sidebar", () => {
   assert.match(src, /Randevu Ayarları/);
 });
 
-// ── Availability engine stub ──
+// ── Availability engine (Phase 3.1.3) ──
 
-test("availability engine stub returns empty slots — no fake data", () => {
+test("availability engine is implemented — returns computed slots", () => {
   const src = readFileSync(new URL("../../src/lib/admin/booking/availability-engine.ts", import.meta.url), "utf8");
-  assert.match(src, /slots: \[\]/);
-  assert.match(src, /Implementation deferred/);
+  assert.match(src, /getAvailableSlots/);
+  assert.doesNotMatch(src, /Implementation deferred/);
   assert.doesNotMatch(src, /fake|placeholder|mock|dummy/);
+  assert.match(src, /computeAvailableSlots/);
 });
 
 test("availability engine uses typed contract", () => {
-  const src = readFileSync(new URL("../../src/lib/admin/booking/availability-engine.ts", import.meta.url), "utf8");
-  assert.match(src, /AvailableSlotRequest/);
-  assert.match(src, /SlotEngineResult/);
-  assert.match(src, /timezone.*Europe\/Istanbul/);
+  const src = readFileSync(new URL("../../src/lib/admin/booking/slot-computation.ts", import.meta.url), "utf8");
+  assert.match(src, /EngineRequest/);
+  assert.match(src, /EngineResponse/);
+  assert.match(src, /Europe\/Istanbul/);
 });
 
 // ── RLS role matrix ──

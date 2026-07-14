@@ -184,14 +184,19 @@ All use `requireAdmin()`, typed validation, user-context Supabase, safe audit ev
 
 ## 14. Manual QA Required
 
-1. Browser test all 9 routes as admin
-2. Vet/staff/anonymous URL access denial test
-3. Service CRUD cycle (create → edit → archive → restore)
-4. Availability editor (vet selection, weekday toggle, copy-day)
-5. Closure CRUD with overlap rejection test
-6. Booking rules update with all fields
-7. Mobile responsive layout testing
-8. Accessibility (keyboard navigation, screen reader)
+| Item | Status |
+|------|--------|
+| Browser test all 9 routes as admin | Not performed |
+| Vet/staff/anonymous URL denial via browser | Not performed — automated tests verify `requireAdmin` guards in all pages and actions |
+| Service CRUD cycle | Not performed |
+| Availability editor (vet selection, copy-day) | Not performed |
+| Closure CRUD with overlap rejection | Not performed |
+| Booking rules update | Not performed |
+| Mobile responsive layout | Not performed |
+| Accessibility (keyboard, screen reader) | Not performed |
+| Git commit | Not performed — no commit hash |
+| Vercel deployment | Not performed — no live URL to smoke-test |
+| Veterinarian/user validation | Not performed |
 
 ---
 
@@ -216,11 +221,11 @@ All use `requireAdmin()`, typed validation, user-context Supabase, safe audit ev
 
 ## 16. Production Readiness
 
-- Code complete and validated locally
-- ✅ Migrations applied remotely (both 3.1.1 and 3.1.2)
+- ✅ Code complete and validated locally (lint/tsc/build clean)
+- ✅ Migrations applied remotely (20260724000000 + 20260725000000)
 - ✅ All automated tests pass (247/247)
-- ✅ Lint, TypeScript, build clean
 - ❌ Manual browser QA unverified
+- ❌ No commit created — no commit hash
 - ❌ Vercel deployment not performed
 - ❌ User validation not performed
 
@@ -244,13 +249,15 @@ All use `requireAdmin()`, typed validation, user-context Supabase, safe audit ev
 
 ## 19. Commit Recommendation
 
-No commit, push, or migration application has been performed per instructions. Recommended next step:
+No commit, push, or migration application has been performed per instructions.
 
-1. Apply migration: `npx supabase db push`
-2. Verify migration applied: `npx supabase migration list`
-3. Perform manual QA (9 routes, role denial, CRUD cycles)
-4. Commit all changes with message: `feat(booking): add admin booking settings module (Phase 3.1.2)`
-5. Deploy to Vercel
+**Pending actions:**
+1. Manual browser QA (9 routes, role denial, CRUD cycles)
+2. `git add` + `git commit -m "feat(booking): add admin booking settings module (Phase 3.1.2)"`
+3. `git push`
+4. Deploy to Vercel
+5. Live smoke test on deployed URL
+6. Veterinarian/admin user validation
 
 ---
 

@@ -134,28 +134,36 @@ No PII (phone, email, tokens, secrets, full notes, descriptions) in any metadata
 
 ---
 
-## Manual QA Required
+## Manual QA and Browser Tests
 
-- Browser testing of all 9 routes as admin
-- Role denial testing (vet/staff/anonymous URL access)
-- Service CRUD cycle (create, edit, archive, restore)
-- Availability editor (vet selection, weekday toggle, copy-day)
-- Closure CRUD with overlap rejection
-- Booking rules update with all fields
-- Mobile responsive layout testing
-- Accessibility (keyboard navigation, screen reader)
+| Item | Result |
+|------|--------|
+| Browser testing of 9 routes | Not performed |
+| Admin direct-route authorization | Not performed — automated tests verify `requireAdmin` in every page and action; browser login test not executed |
+| Veterinarian direct-route denial | Not performed — automated tests verify vet role returns `false` from `canManage*` functions; browser denial test not executed |
+| Staff direct-route denial | Not performed — automated tests verify staff role returns `false` from `canManage*` functions; browser denial test not executed |
+| Service CRUD cycle | Not performed |
+| Availability editor (copy-day, vet selection) | Not performed |
+| Closure CRUD with overlap rejection | Not performed |
+| Booking rules update | Not performed |
+| Mobile responsive layout | Not performed |
+| Accessibility (keyboard, screen reader) | Not performed |
 
----
+## Commit and Deployment
 
-## Deployment Status
+| Item | Result |
+|------|--------|
+| Git commit | Not performed — no commit or push |
+| Commit hash | N/A — no commit created |
+| Vercel deployment | Not performed — no commit to deploy |
+| Live smoke test | Not performed — no live deployment exists |
 
-**Not deployed** — no commit, push, or Vercel deployment has been performed.
+## User Validation
 
----
-
-## User Validation Status
-
-**Not validated** — no veterinarian or admin user has tested the UI.
+| Item | Result |
+|------|--------|
+| Veterinarian UI validation | Not performed |
+| Admin user UI validation | Not performed |
 
 ---
 

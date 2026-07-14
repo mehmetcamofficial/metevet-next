@@ -144,6 +144,16 @@ export default async function BookingSettingsPage() {
         </section>
       </div>
 
+      <section className="mt-4 rounded-2xl bg-white p-6">
+        <h2 className="text-xl font-semibold">Araçlar</h2>
+        <Link
+          href="/admin/booking-settings/slot-preview"
+          className="mt-3 inline-block rounded-lg bg-[#0d2922] px-4 py-2 text-sm font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#cda85f]"
+        >
+          Uygun Saatleri Önizle
+        </Link>
+      </section>
+
       <section className="mt-6 rounded-2xl bg-white p-6">
         <h2 className="text-xl font-semibold">Uygulama Planı</h2>
         <ul className="mt-3 space-y-2 text-sm text-[#526a64]">
