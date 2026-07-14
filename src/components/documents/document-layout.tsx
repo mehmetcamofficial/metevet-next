@@ -3,7 +3,8 @@ import type { ClinicalDocumentData } from "@/src/lib/admin/documents/document-da
 import { registerPdfFonts } from "@/src/lib/admin/documents/pdf-fonts";
 import {
   PdfClinicianSignature,
-  PdfEmptyValue,
+  PdfClinicalSummary,
+  PdfEntries,
   PdfField,
   PdfInfoGrid,
   PdfPageBackground,
@@ -14,7 +15,9 @@ import {
 } from "./pdf-primitives";
 import { DocumentHeader } from "./document-header";
 import { DocumentFooter } from "./document-footer";
+
 registerPdfFonts();
+
 export function ClinicalDocument({ data }: { data: ClinicalDocumentData }) {
   return (
     <Document
@@ -25,7 +28,8 @@ export function ClinicalDocument({ data }: { data: ClinicalDocumentData }) {
       <Page size="A4" style={baseStyles.page} wrap>
         <PdfPageBackground />
         <DocumentHeader data={data} />
-        <PdfSection title="Hayvan ve Sahip Özeti" wrap={false}>
+
+        <PdfSection title="Hayvan ve Sahip Özeti" minPresenceAhead={200}>
           <PdfInfoGrid>
             <PdfField label="Hayvan" value={data.patient.name} />
             <PdfField label="Hayvan Sahibi" value={data.ownerName} />
@@ -41,53 +45,80 @@ export function ClinicalDocument({ data }: { data: ClinicalDocumentData }) {
             <PdfField label="Mikroçip" value={data.patient.microchip} />
           </PdfInfoGrid>
         </PdfSection>
-        {data.vitals ? (
+
+        {data.clinicalSummary ? (
+          <PdfSection title="Klinik Özet" wrap={false}>
+            <PdfClinicalSummary items={data.clinicalSummary} />
+          </PdfSection>
+        ) : null}
+
+        {data.vitals && data.vitals.length ? (
           <PdfSection title="Vital Bulgular" wrap={false}>
             <PdfVitalTable items={data.vitals} />
           </PdfSection>
         ) : null}
-        {data.sections.map((section, i) => (
-          <PdfSection key={`${section.title}-${i}`} title={section.title}>
-            <>
-              {section.rows.length ? (
-                section.rows.map((row, j) => (
-                  <View
-                    key={`${row.label}-${j}`}
-                    style={baseStyles.row}
-                  >
-                    <Text style={baseStyles.label}>{row.label}</Text>
-                    <Text style={baseStyles.value}>
-                      {row.value || "Bilgi girilmemiş"}
-                    </Text>
-                  </View>
-                ))
-              ) : (
-                <PdfEmptyValue />
-              )}
-            </>
-          </PdfSection>
-        ))}
-        {data.clinician ? (
-          <PdfClinicianSignature
-            name={data.clinician}
-            registration={data.clinic.registration}
-          />
-        ) : null}
-        <View
-          style={{
-            marginTop: 16,
-            padding: 9,
-            backgroundColor: pdfColors.soft,
-            borderRadius: 3,
-          }}
-          wrap={false}
-        >
-          <Text
-            style={{ fontSize: 7.5, color: pdfColors.muted, lineHeight: 1.5 }}
+
+        {data.sections.map((section, i) => {
+          if (section.content) {
+            return (
+              <PdfSection key={`${section.title}-${i}`} title={section.title}>
+                <Text style={baseStyles.content}>{section.content}</Text>
+              </PdfSection>
+            );
+          }
+
+          if (section.entries && section.entries.length) {
+            return (
+              <PdfSection key={`${section.title}-${i}`} title={section.title}>
+                <PdfEntries entries={section.entries} />
+              </PdfSection>
+            );
+          }
+
+          const nonEmptyRows = (section.rows ?? []).filter(
+            (row) => row.value && row.value.trim(),
+          );
+          if (!nonEmptyRows.length) return null;
+
+          return (
+            <PdfSection key={`${section.title}-${i}`} title={section.title}>
+              {nonEmptyRows.map((row, j) => (
+                <View
+                  key={`${row.label}-${j}`}
+                  style={baseStyles.row}
+                >
+                  <Text style={baseStyles.label}>{row.label}</Text>
+                  <Text style={baseStyles.value}>{row.value}</Text>
+                </View>
+              ))}
+            </PdfSection>
+          );
+        })}
+
+        <View style={{ marginTop: 12 }}>
+          {data.clinician ? (
+            <PdfClinicianSignature
+              name={data.clinician}
+              registration={data.clinic.registration}
+            />
+          ) : null}
+          <View
+            style={{
+              marginTop: data.clinician ? 12 : 0,
+              padding: 8,
+              backgroundColor: pdfColors.soft,
+              borderRadius: 3,
+            }}
+            wrap={false}
           >
-            {data.disclaimer}
-          </Text>
+            <Text
+              style={{ fontSize: 7.5, color: pdfColors.muted, lineHeight: 1.5 }}
+            >
+              {data.disclaimer}
+            </Text>
+          </View>
         </View>
+
         <DocumentFooter data={data} />
       </Page>
     </Document>

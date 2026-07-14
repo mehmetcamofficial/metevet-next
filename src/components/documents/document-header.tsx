@@ -49,7 +49,7 @@ export function DocumentHeader({ data }: { data: ClinicalDocumentData }) {
         <View style={{ width: "68%" }}>
           <Text style={{ fontSize: 17, fontWeight: 700 }}>{data.title}</Text>
           <Text style={{ fontSize: 8, color: pdfColors.muted, marginTop: 3 }}>
-            Klinik kayıt özeti
+            {data.subtitle}
           </Text>
         </View>
         <View
