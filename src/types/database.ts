@@ -21,6 +21,8 @@ export type DocumentType = "examination_summary"|"vaccination_card"|"parasite_su
 export type DocumentStatus = "generated"|"archived"|"failed";
 export type PetSex = "female" | "male" | "unknown";
 export type AppointmentSource = "website" | "plandok" | "whatsapp" | "phone" | "walk_in" | "admin";
+export type ClosureType = "full_day" | "half_day" | "veterinarian_leave";
+export type ConfirmationMode = "pending" | "confirmed";
 
 type TimestampColumns = {
   created_at: string;
@@ -131,6 +133,9 @@ export type Database = {
           reason: string | null;
           internal_notes: string | null;
           source: AppointmentSource;
+          service_id: string | null;
+          public_booking_reference: string | null;
+          requested_veterinarian_id: string | null;
         };
         Insert: {
           id?: string;
@@ -144,10 +149,141 @@ export type Database = {
           reason?: string | null;
           internal_notes?: string | null;
           source?: AppointmentSource;
+          service_id?: string | null;
+          public_booking_reference?: string | null;
+          requested_veterinarian_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["appointments"]["Insert"]>;
+        Relationships: [];
+      };
+      appointment_services: {
+        Row: TimestampColumns & {
+          id: string;
+          name_tr: string;
+          name_en: string;
+          slug: string;
+          description_tr: string | null;
+          description_en: string | null;
+          duration_minutes: number;
+          buffer_before_minutes: number;
+          buffer_after_minutes: number;
+          is_online_bookable: boolean;
+          requires_manual_confirmation: boolean;
+          is_active: boolean;
+          sort_order: number;
+          created_by: string;
+          updated_by: string;
+          archived_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          name_tr: string;
+          name_en: string;
+          slug: string;
+          description_tr?: string | null;
+          description_en?: string | null;
+          duration_minutes?: number;
+          buffer_before_minutes?: number;
+          buffer_after_minutes?: number;
+          is_online_bookable?: boolean;
+          requires_manual_confirmation?: boolean;
+          is_active?: boolean;
+          sort_order?: number;
+          created_by: string;
+          updated_by: string;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["appointment_services"]["Insert"]>;
+        Relationships: [];
+      };
+      veterinarian_availability: {
+        Row: TimestampColumns & {
+          id: string;
+          veterinarian_id: string;
+          weekday: number;
+          is_available: boolean;
+          start_time: string | null;
+          end_time: string | null;
+          break_start: string | null;
+          break_end: string | null;
+          effective_from: string | null;
+          effective_until: string | null;
+          created_by: string;
+          updated_by: string;
+        };
+        Insert: {
+          id?: string;
+          veterinarian_id: string;
+          weekday: number;
+          is_available?: boolean;
+          start_time?: string | null;
+          end_time?: string | null;
+          break_start?: string | null;
+          break_end?: string | null;
+          effective_from?: string | null;
+          effective_until?: string | null;
+          created_by: string;
+          updated_by: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["veterinarian_availability"]["Insert"]>;
+        Relationships: [];
+      };
+      clinic_closures: {
+        Row: TimestampColumns & {
+          id: string;
+          title: string;
+          starts_at: string;
+          ends_at: string;
+          closure_type: ClosureType;
+          affects_all_veterinarians: boolean;
+          veterinarian_id: string | null;
+          notes: string | null;
+          created_by: string;
+          updated_by: string;
+          archived_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          starts_at: string;
+          ends_at: string;
+          closure_type: ClosureType;
+          affects_all_veterinarians?: boolean;
+          veterinarian_id?: string | null;
+          notes?: string | null;
+          created_by: string;
+          updated_by: string;
+          archived_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["clinic_closures"]["Insert"]>;
+        Relationships: [];
+      };
+      booking_rules: {
+        Row: {
+          id: boolean;
+          minimum_notice_minutes: number;
+          maximum_advance_days: number;
+          slot_interval_minutes: number;
+          default_confirmation_mode: ConfirmationMode;
+          allow_same_day_booking: boolean;
+          require_email: boolean;
+          require_phone: boolean;
+          allow_first_available_veterinarian: boolean;
+          cancellation_notice_minutes: number;
+          created_at: string;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["booking_rules"]["Row"]>;
+        Update: Partial<Database["public"]["Tables"]["booking_rules"]["Row"]>;
         Relationships: [];
       };
       vaccine_records: {
