@@ -1,7 +1,7 @@
 # 031 — Phase 3.1.1: Online Booking Data Foundation
 
 **Date:** 2026-07-24
-**Status:** BLOCKED — migration ready but not applied remotely; awaiting manual `supabase db push`
+**Status:** PASS WITH WARNINGS — migration applied remotely; 12 non-blocking concerns assigned to Phase 3.1.2 backlog
 **Author:** Loop Engineering (autonomous repair cycle)
 
 ---
@@ -91,8 +91,8 @@ Created `validate_active_veterinarian()` SECURITY DEFINER function (`SET search_
 | TypeScript | 0 errors |
 | Build | Success |
 | git diff --check | Clean |
-| Migration list | 20260724000000 local only (not applied remotely) |
-| db push --dry-run | Passes — no errors |
+| Migration list | 20260724000000 local and remote — fully applied |
+| db push --dry-run | Remote database is up to date — no pending migrations |
 
 ---
 
@@ -105,11 +105,12 @@ Created `validate_active_veterinarian()` SECURITY DEFINER function (`SET search_
 
 ---
 
-## Production Readiness Blockers
+## Production Readiness
 
-1. **Migration not applied** — `supabase db push` must be executed manually
+1. **Migration applied successfully** — 20260724000000 exists on remote; local and remote history match
 2. **No UI for CRUD operations** — Phase 3.1.2 will add service/availability/closure/rule management pages
 3. **Availability engine stub** — `availability-engine.ts` is typed but empty; slot calculation pending Phase 3.1.3
+4. **12 non-blocking concerns** — assigned to Phase 3.1.2 backlog (see LOOP REPORT section 7)
 
 ---
 
