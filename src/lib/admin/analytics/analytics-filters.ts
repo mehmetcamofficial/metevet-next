@@ -1,0 +1,4 @@
+import type{AppointmentSource,AppointmentStatus}from"@/src/types/database";
+export type AnalyticsFilters={status?:AppointmentStatus;source?:AppointmentSource;service?:string;veterinarian?:string};
+const statuses:AppointmentStatus[]=['pending','confirmed','completed','cancelled','no_show'],sources:AppointmentSource[]=['website','plandok','whatsapp','phone','walk_in','admin'];
+export function analyticsFilters(q:Record<string,string|undefined>,allowVeterinarian:boolean):AnalyticsFilters{const out:AnalyticsFilters={};if(statuses.includes(q.status as AppointmentStatus))out.status=q.status as AppointmentStatus;if(sources.includes(q.source as AppointmentSource))out.source=q.source as AppointmentSource;if(q.service&&/^[a-z0-9_-]{1,80}$/i.test(q.service))out.service=q.service;if(allowVeterinarian&&q.veterinarian&&/^[a-f0-9-]{36}$/i.test(q.veterinarian))out.veterinarian=q.veterinarian;return out}
