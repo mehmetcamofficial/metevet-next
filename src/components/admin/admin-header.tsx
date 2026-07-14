@@ -1,4 +1,5 @@
 import { logoutAction } from "@/app/admin/actions";
+import Link from "next/link";
 import type { StaffSession } from "@/src/lib/auth/require-staff";
 
 const roleLabels = { admin: "Yönetici", veterinarian: "Veteriner Hekim", staff: "Personel" } as const;
@@ -13,9 +14,9 @@ export function AdminHeader({ session, onMenu }: { session: StaffSession; onMenu
         <p className="text-xs text-[#526a64]">{roleLabels[session.profile.role]}</p>
         </div>
       </div>
-      <form action={logoutAction}>
+      <div className="flex items-center gap-3"><Link href="/admin/profile" className="text-sm font-medium underline">Profilim</Link><form action={logoutAction}>
         <button className="rounded-lg border border-[#0d2922]/20 px-4 py-2 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0d2922]" type="submit">Çıkış Yap</button>
-      </form>
+      </form></div>
     </header>
   );
 }

@@ -1,0 +1,12 @@
+import test from"node:test";import assert from"node:assert/strict";import{readFileSync}from"node:fs";import{validateHours,safeUrl,validateSettingsInput}from"../../src/lib/admin/settings.ts";import{AUDIT_PAGE_SIZE,auditEntityHref,auditOutcome}from"../../src/lib/admin/audit-log.ts";
+const read=(p:string)=>readFileSync(p,"utf8");
+test("settings URLs require https",()=>{assert.equal(safeUrl("http://example.com"),undefined);assert.equal(safeUrl("https://example.com"),"https://example.com")});
+test("business intervals are validated",()=>{assert.ok(validateHours(true,"18:00","09:00","","") );assert.equal(validateHours(true,"09:00","18:00","12:00","13:00"),null)});
+test("unknown and secret-like setting keys are rejected",()=>{const f=new FormData();f.set("clinic_name_tr","MeteVet");f.set("provider_token","x");const r=validateSettingsInput(f);assert.ok(r.errors.form)});
+test("audit pagination is bounded",()=>assert.equal(AUDIT_PAGE_SIZE,30));
+test("audit result and links are derived from allowlists",()=>{assert.equal(auditOutcome("document_generation_failed"),"failure");assert.equal(auditEntityHref("unknown","id"),null)});
+test("admin-only routes enforce requireAdmin",()=>{for(const p of ["app/admin/settings/page.tsx","app/admin/audit-log/page.tsx"])assert.match(read(p),/requireAdmin\(\)/)});
+test("admin navigation exposes implemented routes only to admin",()=>{const x=read("src/components/admin/admin-sidebar.tsx");assert.match(x,/\/admin\/settings/);assert.match(x,/\/admin\/audit-log/);assert.doesNotMatch(x,/admin: \["Ayarlar"/)});
+test("privileged Supabase client remains server-only",()=>{const x=read("src/lib/supabase/admin.ts");assert.match(x,/import "server-only"/);assert.doesNotMatch(x,/NEXT_PUBLIC_SUPABASE_SERVICE/)});
+test("audit migration derives actor and blocks mutation",()=>{const x=read("supabase/migrations/20260722000000_phase_2_10_settings_and_audit_integrity.sql");assert.match(x,/new\.actor_user_id := auth\.uid\(\)/);assert.match(x,/revoke update,delete/);assert.match(x,/security definer set search_path = ''/i)});
+test("audit metadata builders contain no forbidden secret keys",()=>{const files=["app/admin/staff/actions.ts","app/admin/documents/actions.ts","app/admin/reminders/actions.ts"];for(const p of files){const x=read(p).replaceAll("\n"," ");assert.doesNotMatch(x,/metadata\s*:\s*\{[^}]*?(password|token|service_role|signed_url|diagnosis|treatment_plan|rendered_message)/i)}});

@@ -36,5 +36,15 @@ export async function loginAction(
     return { error: "E-posta veya şifre hatalı." };
   }
 
+  const { data: claims } = await supabase.auth.getClaims();
+  const userId = claims?.claims?.sub;
+  const { data: profile } = typeof userId === "string"
+    ? await supabase.from("profiles").select("role,status").eq("id", userId).maybeSingle()
+    : { data: null };
+  if (!profile || profile.status !== "active" || !["admin", "veterinarian", "staff"].includes(profile.role)) {
+    await supabase.auth.signOut();
+    return { error: "Hesabınız aktif değil veya geçerli bir personel profili bulunmuyor." };
+  }
+
   redirect("/admin");
 }

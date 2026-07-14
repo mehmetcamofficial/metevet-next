@@ -7,6 +7,7 @@ export type Json =
   | Json[];
 
 export type UserRole = "admin" | "veterinarian" | "staff";
+export type PersonnelStatus = "active" | "inactive";
 export type AppointmentStatus =
   | "pending"
   | "confirmed"
@@ -34,15 +35,35 @@ export type Database = {
           id: string;
           full_name: string;
           role: UserRole;
+          status: PersonnelStatus;
         };
         Insert: {
           id: string;
           full_name: string;
           role?: UserRole;
+          status?: PersonnelStatus;
           created_at?: string;
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["profiles"]["Insert"]>;
+        Relationships: [];
+      };
+      personnel_private_profiles: {
+        Row: TimestampColumns & { id:string;email:string|null;phone:string|null };
+        Insert: { id:string;email?:string|null;phone?:string|null;created_at?:string;updated_at?:string };
+        Update: Partial<Database["public"]["Tables"]["personnel_private_profiles"]["Insert"]>;
+        Relationships: [];
+      };
+      clinic_settings: {
+        Row: { id:boolean;clinic_name_tr:string;clinic_name_en:string|null;authorized_veterinarian:string|null;phone:string|null;whatsapp:string|null;public_email:string|null;address_tr:string|null;address_en:string|null;map_url:string|null;website_url:string|null;registration_text:string|null;appointment_default_duration:number;appointment_min_duration:number;appointment_max_duration:number;appointment_buffer:number;appointment_default_status:AppointmentStatus;allow_past_appointments:boolean;conflict_policy:string;reminder_days_before:number[];reminder_send_hour:string;reminder_max_retry:number;whatsapp_enabled:boolean;email_enabled:boolean;sms_enabled:boolean;pdf_heading:string|null;logo_media_path:string|null;pdf_footer:string|null;signature_label:string|null;default_locale:"tr"|"en";timezone:string;exclude_internal_notes:boolean;created_at:string;updated_at:string;updated_by:string|null };
+        Insert: Partial<Database["public"]["Tables"]["clinic_settings"]["Row"]>;
+        Update: Partial<Database["public"]["Tables"]["clinic_settings"]["Row"]>;
+        Relationships: [];
+      };
+      clinic_business_hours: {
+        Row: { weekday:number;is_open:boolean;opens_at:string|null;closes_at:string|null;break_starts_at:string|null;break_ends_at:string|null };
+        Insert: Partial<Database["public"]["Tables"]["clinic_business_hours"]["Row"]>;
+        Update: Partial<Database["public"]["Tables"]["clinic_business_hours"]["Row"]>;
         Relationships: [];
       };
       owners: {
@@ -268,6 +289,7 @@ export type Database = {
       pet_sex: PetSex;
       reminder_status: ReminderStatus;
       user_role: UserRole;
+      personnel_status: PersonnelStatus;
     };
     CompositeTypes: { [_ in never]: never };
   };

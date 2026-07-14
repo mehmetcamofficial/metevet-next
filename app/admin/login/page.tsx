@@ -16,7 +16,8 @@ export default async function AdminLoginPage() {
     };
 
     if (!error && typeof data?.claims?.sub === "string") {
-      redirect("/admin");
+      const { data: profile } = await supabase!.from("profiles").select("status").eq("id", data.claims.sub).maybeSingle();
+      if (profile?.status === "active") redirect("/admin");
     }
   }
 

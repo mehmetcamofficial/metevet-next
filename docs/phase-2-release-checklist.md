@@ -6,7 +6,7 @@ Use this checklist against the linked production project. Never paste keys, sign
 
 - [ ] Confirm `npx supabase migration list` has the same local and remote versions.
 - [ ] Run `npx supabase db push --dry-run`; inspect every pending statement before a real push.
-- [ ] Confirm `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in Vercel Production. No service-role key is required.
+- [ ] Confirm `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, server-only `SUPABASE_SERVICE_ROLE_KEY`, and exact `SUPABASE_AUTH_REDIRECT_URL` in Vercel Production.
 - [ ] Run `npm ci`, `npm run test:phase2`, `npm run lint`, `npx tsc --noEmit`, and `npm run build`.
 - [ ] Confirm `npm audit --omit=dev` has no accepted high/critical finding.
 - [ ] Confirm the deployment domain and canonical origin are `https://metevet.com.tr`.
@@ -16,6 +16,10 @@ Use this checklist against the linked production project. Never paste keys, sign
 - [ ] Take a Supabase backup/PITR recovery point before `npx supabase db push`.
 - [ ] Apply migrations once, then rerun `migration list` and `db push --dry-run`.
 - [ ] `20260717000000_phase_2_audit_repairs.sql` replaces validation functions/triggers and Storage policies, and copies previously stranded `vaccine_records` rows into `vaccination_records` with stable IDs and explicit legacy defaults. It does not update or delete existing clinical rows.
+- [ ] `20260718000000_clinician_and_relationship_repairs.sql` enforces veterinarian-only clinical attribution, active owner/pet relationships, immutable reminder provenance, and generated-document source integrity without rewriting historical clinical rows.
+- [ ] `20260719000000_document_source_and_lifecycle_repairs.sql` preserves document source semantics and cancels active reminders when a vaccination or parasite source is archived. It replaces trigger functions without deleting clinical data.
+- [ ] `20260720000000_personnel_and_account_security.sql` adds active/inactive personnel state, final-admin/self-role protection, active-session authorization, and active-clinician enforcement without deleting profile or clinical history.
+- [ ] `20260721000000_personnel_private_data_reconciliation.sql` idempotently moves personnel email/phone out of the broadly readable profile table into self/admin-only RLS storage. It is required because `20260720000000` was applied while the final privacy review was in progress.
 - [ ] Emergency rollback: drop `reminders_protect_record` and `appointments_validate_relationships`, restore the prior upload policy, and restore the prior function definitions from migration history. Rollback weakens protection but does not lose row data.
 - [ ] Do not roll back by deleting clinical rows or rewriting applied migration history.
 
@@ -40,6 +44,7 @@ Use this checklist against the linked production project. Never paste keys, sign
 - [ ] Supabase Storage shows `clinical-documents` as private, PDF-only, and limited to 10 MB.
 - [ ] Clinical upload object names begin with the authenticated user's UUID folder.
 - [ ] No public URL exists; download redirects use a signed URL expiring after five minutes.
+- [ ] Archiving metadata does not revoke a signed URL already issued; it expires naturally within five minutes. Permanent deletion removes the private Storage object so later signed-URL requests fail.
 - [ ] Generate, download, regenerate, archive/restore, and delete one disposable document.
 - [ ] Force an upload and metadata failure in staging; confirm no metadata points to a missing object and cleanup is operationally visible.
 - [ ] Confirm PDFs omit internal notes unless an administrator explicitly includes them.
@@ -49,7 +54,8 @@ Use this checklist against the linked production project. Never paste keys, sign
 For each row test unauthenticated, staff, veterinarian, admin, malformed UUID, and missing record behavior where applicable.
 
 - [ ] Public: `/`, `/tr`, `/en`, `/tr/randevu`, `/en/appointment`, `/tr/blog`, `/en/blog`, `/tr/iletisim`, `/en/contact`.
-- [ ] Auth: `/admin/login`, `/admin`, logout.
+- [ ] Auth: `/admin/login`, `/admin/forgot-password`, `/admin/reset-password`, `/admin/profile`, `/admin`, logout.
+- [ ] Personnel: `/admin/staff`, `/admin/staff/invite`, `/admin/staff/[id]`, `/admin/staff/[id]/edit` (admin only).
 - [ ] Records: `/admin/owners`, `/admin/owners/new`, `/admin/pets`, `/admin/pets/new`.
 - [ ] Clinical: `/admin/appointments`, `/admin/appointments/new`, `/admin/calendar`, `/admin/examinations`, `/admin/examinations/new`, `/admin/vaccines`, `/admin/vaccines/new`, `/admin/parasites`, `/admin/parasites/new`.
 - [ ] Operations: `/admin/reminders`, `/admin/reminders/new`, `/admin/reminders/templates`, `/admin/documents`, `/admin/documents/generate`.

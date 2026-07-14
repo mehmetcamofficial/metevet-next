@@ -21,8 +21,8 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     const claims = claimsData?.claims;
     const userId = claims?.sub;
     if (!claimsError && typeof userId === "string") {
-      const { data: profile } = await supabase.from("profiles").select("full_name, role").eq("id", userId).single();
-      if (profile) session = { id: userId, email: typeof claims?.email === "string" ? claims.email : null, profile: { fullName: profile.full_name, role: profile.role } };
+      const { data: profile } = await supabase.from("profiles").select("full_name, role, status").eq("id", userId).single();
+      if (profile?.status === "active") session = { id: userId, email: typeof claims?.email === "string" ? claims.email : null, profile: { fullName: profile.full_name, role: profile.role, status: "active" } };
     }
   }
 

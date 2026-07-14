@@ -5,22 +5,21 @@ import { updateSession } from "@/src/lib/supabase/proxy";
 
 export async function proxy(request: NextRequest) {
   const { response, userId, configured } = await updateSession(request);
-  const isLogin = request.nextUrl.pathname === "/admin/login";
+  const publicAuthRoutes = ["/admin/login", "/admin/forgot-password", "/admin/reset-password"];
+  const isPublicAuth = publicAuthRoutes.includes(request.nextUrl.pathname);
 
   let result = response;
 
-  if (!configured && !isLogin) {
+  if (!configured && !isPublicAuth) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin/login";
     url.search = "?configuration=missing";
     result = NextResponse.redirect(url);
-  } else if (!userId && !isLogin) {
+  } else if (!userId && !isPublicAuth) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin/login";
     url.searchParams.set("next", request.nextUrl.pathname);
     result = NextResponse.redirect(url);
-  } else if (userId && isLogin) {
-    result = NextResponse.redirect(new URL("/admin", request.url));
   }
 
   result.headers.set("Cache-Control", "private, no-store, max-age=0");

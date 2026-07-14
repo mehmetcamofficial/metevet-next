@@ -13,10 +13,13 @@ mevcut randevu akışları Supabase yapılandırılmadan da çalışmaya devam e
 ```dotenv
 NEXT_PUBLIC_SUPABASE_URL=https://PROJECT_REF.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+SUPABASE_SERVICE_ROLE_KEY=server-only-placeholder
+SUPABASE_AUTH_REDIRECT_URL=https://YOUR_DOMAIN/admin/reset-password
 ```
 
-Gerçek anahtarları repoya commit etmeyin. Service role/secret key bu web
-uygulamasında gerekli değildir ve browser ortamına kesinlikle eklenmemelidir.
+Gerçek anahtarları repoya commit etmeyin. Service role anahtarı yalnız personel
+daveti ve Auth yönetimi için server-only modülde kullanılır. `NEXT_PUBLIC_`
+önekine sahip olmamalı, Client Component içine import edilmemeli ve loglanmamalıdır.
 
 ## 2. Migration'ı uygulama
 
@@ -28,24 +31,29 @@ npx supabase link --project-ref PROJECT_REF
 npx supabase db push
 ```
 
-Alternatif olarak `supabase/migrations/20260713150000_phase_2_1_foundation.sql`
-dosyasını Supabase SQL Editor içinde bir kez çalıştırabilirsiniz.
+SQL Editor üzerinden yalnızca tek bir migration çalıştırmak desteklenmez; Phase 2
+bağımlılıkları sıralıdır. CLI kullanılamıyorsa tüm migration dosyalarını dosya
+adına göre sırayla, önce staging ortamında doğrulayarak uygulayın.
 
-## 3. İlk yöneticiyi oluşturma
+## 3. Rol test hesaplarını oluşturma
 
 Public kayıt ekranı bilerek yoktur.
 
-1. Supabase Dashboard > Authentication > Users alanından bir kullanıcı ekleyin.
-2. Oluşan kullanıcının UUID değerini kullanarak SQL Editor'da profil oluşturun:
+Supabase Dashboard > Authentication > Users alanından birbirinden ayrı üç kullanıcı oluşturun. Parolaları yalnız Dashboard/test parola kasasında tutun; SQL, terminal çıktısı, doküman veya commit içine yazmayın. Her kullanıcının UUID değerini aşağıdaki güvenilir SQL Editor işlemlerinde kullanın:
 
 ```sql
-insert into public.profiles (id, full_name, role)
-values ('AUTH_USER_UUID', 'Yönetici Adı', 'admin');
+insert into public.profiles (id, full_name, role, status) values
+  ('STAFF_AUTH_USER_UUID', 'Test Personeli', 'staff', 'active'),
+  ('VETERINARIAN_AUTH_USER_UUID', 'Test Veterineri', 'veterinarian', 'active'),
+  ('ADMIN_AUTH_USER_UUID', 'Test Yöneticisi', 'admin', 'active');
+
+insert into public.personnel_private_profiles (id, email) values
+  ('STAFF_AUTH_USER_UUID', 'STAFF_EMAIL_FROM_AUTH'),
+  ('VETERINARIAN_AUTH_USER_UUID', 'VETERINARIAN_EMAIL_FROM_AUTH'),
+  ('ADMIN_AUTH_USER_UUID', 'ADMIN_EMAIL_FROM_AUTH');
 ```
 
-İlk profil yalnızca güvenilir Dashboard/SQL ortamından oluşturulmalıdır. Sonraki
-profil işlemleri RLS tarafından admin rolüyle sınırlandırılır. Bir kullanıcı
-kendi rolünü değiştiremez.
+İlk profiller yalnızca güvenilir Dashboard/SQL ortamından oluşturulmalıdır. UUID değerlerinin doğru Auth kullanıcılarına ait olduğunu ikinci kez kontrol edin. Sonraki profil işlemleri RLS tarafından admin rolüyle sınırlandırılır ve kullanıcı kendi rolünü değiştiremez. `admin` rolü tek başına veteriner atfı sağlamaz; klinik kayıtlarda yalnız `veterinarian` profili seçilebilir.
 
 ## 4. Doğrulama
 
@@ -57,3 +65,17 @@ Migration tüm klinik tablolarında RLS'yi etkinleştirir. Anonim erişim için
 politika yoktur; personel okuyabilir, admin/veteriner klinik kayıtlarını
 oluşturup güncelleyebilir ve yalnızca admin silebilir. Audit kayıtları normal
 uygulama istemcilerinde append-only'dir.
+
+Personel doğrulaması için parola veya token göstermeden şu sorguyu çalıştırın:
+
+```sql
+select p.id, p.full_name, private.email, p.role, p.status, p.created_at
+from public.profiles p
+join public.personnel_private_profiles private using(id)
+order by p.created_at;
+```
+
+Yeni personel normalde `/admin/staff/invite` üzerinden davet edilir. Davet edilen
+kullanıcı kendi şifresini e-posta bağlantısından belirler. Auth daveti oluşup
+profil provision başarısız olursa admin detail ekranındaki onarım işlemi aynı
+Auth UUID’siyle profili güvenli biçimde tamamlar.

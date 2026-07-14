@@ -1,0 +1,5 @@
+export const AUDIT_PAGE_SIZE=30;
+export const actionLabels:Record<string,string>={settings_updated:"Ayarlar güncellendi",settings_business_hours_updated:"Çalışma saatleri güncellendi",personnel_invited:"Personel davet edildi",personnel_role_changed:"Personel rolü değişti",appointment_created:"Randevu oluşturuldu",appointment_updated:"Randevu güncellendi",document_generated:"Belge üretildi",document_generation_failed:"Belge üretilemedi",reminder_created:"Hatırlatma oluşturuldu",password_changed:"Parola değiştirildi"};
+export function auditLabel(action:string){return actionLabels[action]??action.replaceAll("_"," ")}
+export function auditOutcome(action:string){return action.includes("failed")?"failure":"success" as const}
+export function auditEntityHref(type:string,id:string|null){if(!id)return null;const map:Record<string,string>={profile:"staff",owner:"owners",pet:"pets",appointment:"appointments",examination:"examinations",vaccination_record:"vaccines",parasite_record:"parasites",reminder:"reminders",generated_document:"documents"};return map[type]?`/admin/${map[type]}/${id}`:null}

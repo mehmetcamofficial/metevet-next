@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 
 import { loginAction, type LoginState } from "./actions";
 
@@ -59,6 +60,7 @@ export function LoginForm() {
       >
         {pending ? "Giriş yapılıyor…" : "Giriş Yap"}
       </button>
+      <p className="text-center text-sm"><Link href="/admin/forgot-password" className="font-medium underline">Şifremi Unuttum</Link></p>
     </form>
   );
 }
