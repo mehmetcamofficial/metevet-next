@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:phase2": "node --no-warnings --experimental-strip-types --test tests/phase-2/*.test.ts"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.5.1",
