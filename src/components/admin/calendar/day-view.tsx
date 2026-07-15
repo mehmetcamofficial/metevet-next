@@ -2,7 +2,14 @@ import Link from "next/link";
 import type { CalendarAppointment } from "@/src/lib/admin/calendar/calendar-readers";
 import { serviceLabels, sourceLabels } from "@/src/lib/admin/appointments";
 
-const HOURS = Array.from({ length: 14 }, (_, i) => i + 7); // 07:00 - 20:00
+/** Visible day window: 07:00 – 20:00 (13 hours). */
+const START_HOUR = 7;
+const END_HOUR = 20;
+const TOTAL_MINUTES = (END_HOUR - START_HOUR) * 60; // 780
+/** Fixed hour row height keeps cards inside the grid on all breakpoints. */
+const HOUR_HEIGHT_PX = 64;
+const GRID_HEIGHT_PX = ((END_HOUR - START_HOUR) * HOUR_HEIGHT_PX);
+const HOURS = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => START_HOUR + i);
 
 function statusIcon(status: string): string {
   switch (status) {
@@ -17,6 +24,18 @@ function statusIcon(status: string): string {
 
 function channelLabel(source: string): string {
   return sourceLabels[source as keyof typeof sourceLabels] ?? source;
+}
+
+function formatTime(iso: string): string {
+  return new Intl.DateTimeFormat("tr-TR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(iso));
+}
+
+function minutesFromStart(iso: string): number {
+  const d = new Date(iso);
+  return d.getHours() * 60 + d.getMinutes() - START_HOUR * 60;
 }
 
 export function DayView({ items }: { items: CalendarAppointment[] }) {
@@ -40,57 +59,121 @@ export function DayView({ items }: { items: CalendarAppointment[] }) {
               <h2 className="mb-2 text-sm font-semibold text-[#526a64]">
                 {vetId === "unassigned" ? "Atanmamış" : `Veteriner`}
               </h2>
-              <div className="relative">
-                {/* Time axis */}
-                <div className="absolute left-0 top-0 h-full w-16 border-r border-[#D1DBD5]">
-                  {HOURS.map((h) => (
-                    <div
-                      key={h}
-                      className="absolute w-full border-t border-[#f0f0f0]"
-                      style={{ top: `${((h - 7) * 60) / 1440 * 100}%` }}
-                    >
-                      <span className="ml-1 text-xs text-[#95A8A2]">
-                        {String(h).padStart(2, "0")}:00
-                      </span>
-                    </div>
-                  ))}
+
+              {/* Timeline grid: fixed height so % / px positioning is stable */}
+              <div
+                className="relative flex min-w-0"
+                style={{ height: GRID_HEIGHT_PX }}
+              >
+                {/* Time axis labels */}
+                <div
+                  className="relative w-14 shrink-0 border-r border-[#D1DBD5] sm:w-16"
+                  aria-hidden
+                >
+                  {HOURS.map((h) => {
+                    const top = ((h - START_HOUR) / (END_HOUR - START_HOUR)) * 100;
+                    // End label (20:00) sits just above the bottom edge
+                    const isEnd = h === END_HOUR;
+                    return (
+                      <div
+                        key={h}
+                        className="absolute left-0 w-full"
+                        style={{
+                          top: isEnd ? "auto" : `${top}%`,
+                          bottom: isEnd ? 0 : undefined,
+                          transform: isEnd ? undefined : "translateY(-50%)",
+                        }}
+                      >
+                        <span className="ml-1 text-[10px] leading-none text-[#95A8A2] sm:text-xs">
+                          {String(h).padStart(2, "0")}:00
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
 
-                {/* Appointments */}
-                <div className="ml-16 space-y-2">
+                {/* Appointment lane: grid lines + cards */}
+                <div className="relative min-w-0 flex-1 overflow-hidden">
+                  {/* Hour row borders (below cards) */}
+                  {HOURS.slice(0, -1).map((h) => {
+                    const top = ((h - START_HOUR) / (END_HOUR - START_HOUR)) * 100;
+                    return (
+                      <div
+                        key={h}
+                        className="pointer-events-none absolute inset-x-0 border-t border-[#f0f0f0]"
+                        style={{ top: `${top}%`, height: HOUR_HEIGHT_PX }}
+                        aria-hidden
+                      />
+                    );
+                  })}
+                  {/* Bottom border of last hour */}
+                  <div
+                    className="pointer-events-none absolute inset-x-0 bottom-0 border-t border-[#f0f0f0]"
+                    aria-hidden
+                  />
+
+                  {/* Appointment cards — z-10: above grid, below sticky toolbars (z-20+) */}
                   {appts.map((item) => {
-                    const startMin = new Date(item.starts_at).getHours() * 60 + new Date(item.starts_at).getMinutes();
-                    const durationMin = (new Date(item.ends_at).getTime() - new Date(item.starts_at).getTime()) / 60000;
-                    const topPercent = ((startMin - 420) / 780) * 100;
-                    const heightPercent = (durationMin / 780) * 100;
+                    const startOffset = minutesFromStart(item.starts_at);
+                    const durationMin = Math.max(
+                      15,
+                      (new Date(item.ends_at).getTime() - new Date(item.starts_at).getTime()) / 60000,
+                    );
+
+                    // Clamp into visible window
+                    const clampedStart = Math.max(0, Math.min(TOTAL_MINUTES, startOffset));
+                    const clampedEnd = Math.max(
+                      clampedStart + 15,
+                      Math.min(TOTAL_MINUTES, startOffset + durationMin),
+                    );
+                    const topPx = (clampedStart / TOTAL_MINUTES) * GRID_HEIGHT_PX;
+                    const heightPx = Math.max(
+                      28,
+                      ((clampedEnd - clampedStart) / TOTAL_MINUTES) * GRID_HEIGHT_PX,
+                    );
+
+                    // Inset from row edges so the card sits fully inside the hour row
+                    const insetTop = 2;
+                    const insetBottom = 2;
+                    const cardTop = topPx + insetTop;
+                    const cardHeight = Math.max(24, heightPx - insetTop - insetBottom);
 
                     return (
                       <Link
                         key={item.id}
                         href={`/admin/appointments/${item.id}`}
-                        className={`absolute left-0 right-0 ml-2 block rounded-lg border p-2 text-xs hover:shadow ${
-                          item.status === "pending" ? "border-amber-300 bg-amber-50" : "border-[#D1DBD5] bg-white"
+                        className={`absolute z-10 block overflow-hidden rounded-md border px-2 pb-1 pt-1.5 text-xs leading-tight hover:shadow ${
+                          item.status === "pending"
+                            ? "border-amber-300 bg-amber-50"
+                            : "border-[#D1DBD5] bg-white"
                         }`}
                         style={{
-                          top: `${Math.max(0, topPercent)}%`,
-                          height: `${Math.max(2, heightPercent)}%`,
+                          top: cardTop,
+                          height: cardHeight,
+                          left: 8,
+                          right: 4,
                         }}
-                        aria-label={`${item.pet_name} - ${new Intl.DateTimeFormat("tr-TR", { hour: "2-digit", minute: "2-digit" }).format(new Date(item.starts_at))}`}
+                        aria-label={`${item.pet_name} - ${formatTime(item.starts_at)}`}
                       >
-                        <div className="flex items-center gap-1">
-                          <span>{statusIcon(item.status)}</span>
-                          <span className="font-semibold">
-                            {new Intl.DateTimeFormat("tr-TR", { hour: "2-digit", minute: "2-digit" }).format(new Date(item.starts_at))}
+                        <div className="flex min-w-0 items-center gap-1.5">
+                          <span
+                            className="inline-flex h-4 w-4 shrink-0 items-center justify-center text-[11px] leading-none"
+                            aria-hidden
+                          >
+                            {statusIcon(item.status)}
                           </span>
-                          <span>{item.pet_name}</span>
+                          <span className="shrink-0 font-semibold tabular-nums">
+                            {formatTime(item.starts_at)}
+                          </span>
+                          <span className="min-w-0 truncate">{item.pet_name}</span>
                         </div>
-                        <div className="mt-1 text-[#526a64]">
+                        <div className="mt-0.5 truncate text-[#526a64]">
                           {item.owner_name} · {serviceLabels[item.service_key] ?? item.service_key}
                         </div>
-                        <div className="mt-0.5 flex items-center gap-2 text-[10px] text-[#95A8A2]">
-                          <span>{channelLabel(item.source)}</span>
+                        <div className="mt-0.5 flex min-w-0 items-center gap-2 truncate text-[10px] text-[#95A8A2]">
+                          <span className="shrink-0">{channelLabel(item.source)}</span>
                           {item.public_booking_reference && (
-                            <span className="font-mono">{item.public_booking_reference}</span>
+                            <span className="truncate font-mono">{item.public_booking_reference}</span>
                           )}
                         </div>
                       </Link>
