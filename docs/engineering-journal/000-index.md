@@ -27,3 +27,5 @@ Phase-by-phase record of design decisions, migration issues, and resolution rati
 | [041-R](041-phase-3-5-loop-report.md) | 3.5 | Loop Report — 20-section | 2026-07-25 |
 | [042](042-phase-3-6-veterinarian-workspace.md) | 3.6 | Veterinarian Workspace — PASS WITH WARNINGS (7/10) | 2026-07-25 |
 | [042-R](042-phase-3-6-loop-report.md) | 3.6 | Loop Report — 20-section | 2026-07-25 |
+| [043](043-phase-3-7-patient-check-in-flow.md) | 3.7 | Patient Check-in and Clinic Flow — PASS WITH WARNINGS | 2026-07-16 |
+| [043-R](043-phase-3-7-loop-report.md) | 3.7 | Loop Report — 20-section | 2026-07-16 |

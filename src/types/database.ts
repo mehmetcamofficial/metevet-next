@@ -23,6 +23,13 @@ export type PetSex = "female" | "male" | "unknown";
 export type AppointmentSource = "website" | "plandok" | "whatsapp" | "phone" | "walk_in" | "admin";
 export type ClosureType = "full_day" | "half_day" | "veterinarian_leave";
 export type ConfirmationMode = "pending" | "confirmed";
+export type ClinicFlowState =
+  | "scheduled"
+  | "checked_in"
+  | "waiting"
+  | "called"
+  | "in_examination"
+  | "completed";
 
 type TimestampColumns = {
   created_at: string;
@@ -136,6 +143,12 @@ export type Database = {
           service_id: string | null;
           public_booking_reference: string | null;
           requested_veterinarian_id: string | null;
+          checked_in_at: string | null;
+          waiting_started_at: string | null;
+          called_at: string | null;
+          examination_started_at: string | null;
+          flow_completed_at: string | null;
+          flow_state: ClinicFlowState;
         };
         Insert: {
           id?: string;
@@ -152,6 +165,12 @@ export type Database = {
           service_id?: string | null;
           public_booking_reference?: string | null;
           requested_veterinarian_id?: string | null;
+          checked_in_at?: string | null;
+          waiting_started_at?: string | null;
+          called_at?: string | null;
+          examination_started_at?: string | null;
+          flow_completed_at?: string | null;
+          flow_state?: ClinicFlowState;
           created_at?: string;
           updated_at?: string;
         };

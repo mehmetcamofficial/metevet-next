@@ -2,7 +2,11 @@ import { AdminShell } from "@/src/components/admin/admin-shell";
 import { ReceptionToolbar } from "@/src/components/admin/reception/reception-toolbar";
 import { ReceptionWorkspace } from "@/src/components/admin/reception/reception-workspace";
 import { QuickActions } from "@/src/components/admin/quick-actions";
-import { getReceptionAppointments, getReceptionMetrics, searchOwnersAndPets } from "@/src/lib/admin/reception/reception-readers";
+import {
+  getReceptionAppointments,
+  getReceptionMetrics,
+  searchOwnersAndPets,
+} from "@/src/lib/admin/reception/reception-readers";
 import { requireStaff } from "@/src/lib/auth/require-staff";
 import { createClient } from "@/src/lib/supabase/server";
 
@@ -20,7 +24,9 @@ export default async function ReceptionPage({
   const session = await requireStaff();
   const p = await searchParams;
 
-  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Istanbul" }).format(new Date());
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Istanbul" }).format(
+    new Date(),
+  );
   const date = /^\d{4}-\d{2}-\d{2}$/.test(p.date ?? "") ? p.date! : today;
   const searchQuery = p.search?.trim() ?? "";
 
@@ -31,11 +37,12 @@ export default async function ReceptionPage({
   const dateStart = `${date}T00:00:00.000Z`;
   const dateEnd = shiftDate(date, 1) + "T00:00:00.000Z";
 
-  // Fetch in parallel
   const [appointments, metrics, searchResults] = await Promise.all([
     getReceptionAppointments(s, dateStart, dateEnd),
     getReceptionMetrics(s, dateStart, dateEnd),
-    searchQuery.length >= 2 ? searchOwnersAndPets(s, searchQuery) : Promise.resolve({ owners: [], pets: [] }),
+    searchQuery.length >= 2
+      ? searchOwnersAndPets(s, searchQuery)
+      : Promise.resolve({ owners: [], pets: [] }),
   ]);
 
   return (
@@ -44,7 +51,12 @@ export default async function ReceptionPage({
         <h1 className="text-3xl font-semibold">Resepsiyon</h1>
       </div>
 
-      <ReceptionToolbar date={date} previous={shiftDate(date, -1)} next={shiftDate(date, 1)} today={today} />
+      <ReceptionToolbar
+        date={date}
+        previous={shiftDate(date, -1)}
+        next={shiftDate(date, 1)}
+        today={today}
+      />
 
       <div className="mt-4">
         <ReceptionWorkspace
@@ -52,6 +64,8 @@ export default async function ReceptionPage({
           metrics={metrics}
           date={date}
           today={today}
+          role={session.profile.role}
+          actorId={session.id}
           searchResults={searchQuery.length >= 2 ? searchResults : undefined}
         />
       </div>

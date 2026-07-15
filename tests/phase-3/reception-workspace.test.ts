@@ -346,7 +346,7 @@ test("52. Accessible dialogs — aria-label used", () => {
 });
 
 test("53. Non-color-only statuses — status icon + badge", () => {
-  assert.match(RECEPTION_CARD, /statusIcon/);
+  assert.match(RECEPTION_CARD, /FlowStateBadge/);
   assert.match(RECEPTION_CARD, /AppointmentStatusBadge/);
 });
 

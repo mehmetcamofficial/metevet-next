@@ -281,8 +281,8 @@ test("46. No N+1 architecture — batch lookups", () => {
   assert.match(VET_READERS, /Promise\.all/);
 });
 
-test("47. No full examination payload — no examination content in readers", () => {
-  assert.doesNotMatch(VET_READERS, /examination_id|clinical_notes|diagnosis_details/i);
+test("47. No full examination payload — no clinical content in readers", () => {
+  assert.doesNotMatch(VET_READERS, /clinical_notes|diagnosis_details|treatment_plan|medication/i);
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -305,12 +305,12 @@ test("50. No horizontal overflow — flex-wrap used", () => {
   assert.match(metrics, /flex-wrap/);
 });
 
-test("51. Keyboard support — Link elements used", () => {
-  assert.match(NEXT_PATIENT, /<Link/);
+test("51. Keyboard support — ClinicFlowActions provides accessible buttons", () => {
+  assert.match(NEXT_PATIENT, /ClinicFlowActions/);
 });
 
 test("52. Non-color-only statuses — status icon + badge", () => {
-  assert.match(VET_QUEUE, /statusIcon/);
+  assert.match(VET_QUEUE, /FlowStateBadge/);
   assert.match(VET_QUEUE, /AppointmentStatusBadge/);
 });
 
