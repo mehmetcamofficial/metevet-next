@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { AppointmentPage } from "@/src/components/appointment/appointment-page";
+import { PublicBookingWizardPage } from "@/src/components/public-booking/wizard-page";
 
 const siteUrl = "https://metevet.com.tr";
-type AppointmentRouteProps = { params: Promise<{ locale: string }> };
+type Props = { params: Promise<{ locale: string }> };
 
-export async function generateMetadata({ params }: AppointmentRouteProps): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   if (locale !== "tr") notFound();
 
-  const title = "Randevu Talebi Oluştur | MeteVet";
-  const description = "MeteVet Veteriner Kliniği için WhatsApp üzerinden güvenli ve hızlı bir randevu talebi oluşturun.";
+  const title = "Online Randevu | MeteVet";
+  const description = "MeteVet Veteriner Kliniği'nde online randevu alın. Hizmet seçin, uygun zamanı belirleyin ve randevu talebinizi oluşturun.";
   const canonical = `${siteUrl}/tr/randevu`;
 
   return {
@@ -21,13 +21,20 @@ export async function generateMetadata({ params }: AppointmentRouteProps): Promi
       canonical,
       languages: { tr: canonical, en: `${siteUrl}/en/appointment` },
     },
-    openGraph: { type: "website", url: canonical, title, description, locale: "tr_TR", siteName: "MeteVet Veteriner Kliniği" },
+    openGraph: {
+      type: "website",
+      url: canonical,
+      title,
+      description,
+      locale: "tr_TR",
+      siteName: "MeteVet Veteriner Kliniği",
+    },
     twitter: { card: "summary", title, description },
   };
 }
 
-export default async function TurkishAppointmentRoute({ params }: AppointmentRouteProps) {
+export default async function TurkishAppointmentRoute({ params }: Props) {
   const { locale } = await params;
   if (locale !== "tr") notFound();
-  return <AppointmentPage locale="tr" />;
+  return <PublicBookingWizardPage locale="tr" />;
 }

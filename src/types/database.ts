@@ -419,6 +419,7 @@ export type Database = {
       is_admin: { Args: Record<string, never>; Returns: boolean };
       is_clinical_staff: { Args: Record<string, never>; Returns: boolean };
       is_staff: { Args: Record<string, never>; Returns: boolean };
+      create_public_booking: { Args: { payload: Record<string, unknown> }; Returns: Record<string, unknown> };
     };
     Enums: {
       appointment_status: AppointmentStatus;

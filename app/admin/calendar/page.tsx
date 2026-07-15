@@ -1,3 +1,111 @@
-import { AdminShell } from "@/src/components/admin/admin-shell";import{CalendarToolbar}from"@/src/components/admin/calendar/calendar-toolbar";import{DayView}from"@/src/components/admin/calendar/day-view";import{WeekView}from"@/src/components/admin/calendar/week-view";import{MonthView}from"@/src/components/admin/calendar/month-view";import{MobileAgenda}from"@/src/components/admin/calendar/mobile-agenda";import type{AppointmentItem}from"@/src/components/admin/appointments/appointment-card";import{calendarRange}from"@/src/lib/admin/appointments";import{requireStaff}from"@/src/lib/auth/require-staff";import{createClient}from"@/src/lib/supabase/server";
-function dateString(d:Date){return d.toISOString().slice(0,10)}function shift(anchor:string,view:string,direction:number){const d=new Date(`${anchor}T12:00:00Z`);if(view==="month")d.setUTCMonth(d.getUTCMonth()+direction);else d.setUTCDate(d.getUTCDate()+direction*(view==="week"?7:1));return dateString(d)}
-export default async function CalendarPage({searchParams}:{searchParams:Promise<{view?:string;date?:string}>}){const session=await requireStaff();const p=await searchParams;const view=(p.view==="week"||p.view==="month"?p.view:"day") as "day"|"week"|"month";const today=new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Istanbul"}).format(new Date());const anchor=/^\d{4}-\d{2}-\d{2}$/.test(p.date??"")?p.date!:today;const range=calendarRange(anchor,view);const s=await createClient();let items:AppointmentItem[]=[];if(s){const[a,o,pet,staff]=await Promise.all([s.from("appointments").select("*").gte("starts_at",range.start).lt("starts_at",range.end).order("starts_at"),s.from("owners").select("id, full_name"),s.from("pets").select("id, name"),s.from("profiles").select("id, full_name")]);const om=new Map(o.data?.map(x=>[x.id,x.full_name])),pm=new Map(pet.data?.map(x=>[x.id,x.name])),sm=new Map(staff.data?.map(x=>[x.id,x.full_name]));items=(a.data??[]).map(x=>({...x,owner:om.get(x.owner_id)??"—",pet:pm.get(x.pet_id)??"—",assigned:x.assigned_user_id?sm.get(x.assigned_user_id)??"—":null}));}const monthStart=new Date(`${anchor.slice(0,7)}-01T12:00:00Z`),monthEnd=new Date(monthStart);monthEnd.setUTCMonth(monthEnd.getUTCMonth()+1);const days=[];for(const d=new Date(monthStart);d<monthEnd;d.setUTCDate(d.getUTCDate()+1))days.push(dateString(d));return <AdminShell session={session}><h1 className="mb-6 text-3xl font-semibold">Randevu Takvimi</h1><CalendarToolbar view={view} anchor={anchor} previous={shift(anchor,view,-1)} next={shift(anchor,view,1)} today={today}/><div className="mt-6">{view==="day"?<DayView items={items}/>:view==="week"?<WeekView items={items}/>:<MonthView items={items} days={days}/>}<MobileAgenda items={items}/>{items.length===0?<p className="rounded-xl bg-white p-8 text-center text-[#526a64]">Bu dönemde randevu yok.</p>:null}</div></AdminShell>}
+import { AdminShell } from "@/src/components/admin/admin-shell";
+import { CalendarToolbar } from "@/src/components/admin/calendar/calendar-toolbar";
+import { DayView } from "@/src/components/admin/calendar/day-view";
+import { WeekView } from "@/src/components/admin/calendar/week-view";
+import { MobileAgenda } from "@/src/components/admin/calendar/mobile-agenda";
+import { PendingQueue } from "@/src/components/admin/calendar/pending-queue";
+import { DailyMetricsBar } from "@/src/components/admin/calendar/daily-metrics-bar";
+import { ClosureOverlay } from "@/src/components/admin/calendar/closure-overlay";
+import { getCalendarAppointments, getCalendarClosures, getDailyMetrics, getActiveVeterinarians } from "@/src/lib/admin/calendar/calendar-readers";
+import { requireStaff } from "@/src/lib/auth/require-staff";
+import { createClient } from "@/src/lib/supabase/server";
+
+const ALLOWED_VIEWS = ["day", "week", "agenda"] as const;
+type CalendarView = (typeof ALLOWED_VIEWS)[number];
+
+function shiftDate(date: string, delta: number, view: string): string {
+  const d = new Date(`${date}T12:00:00Z`);
+  if (view === "week") d.setUTCDate(d.getUTCDate() + delta * 7);
+  else d.setUTCDate(d.getUTCDate() + delta);
+  return d.toISOString().slice(0, 10);
+}
+
+export default async function CalendarPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string; date?: string; veterinarian?: string; status?: string }>;
+}) {
+  const session = await requireStaff();
+  const p = await searchParams;
+
+  const rawView = p.view;
+  const view: CalendarView = ALLOWED_VIEWS.includes(rawView as CalendarView)
+    ? (rawView as CalendarView)
+    : "day";
+
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Istanbul" }).format(new Date());
+  const anchor = /^\d{4}-\d{2}-\d{2}$/.test(p.date ?? "") ? p.date! : today;
+
+  const s = await createClient();
+  if (!s) return <p role="alert">Veri yüklenemedi.</p>;
+
+  // Compute date range for bounded queries
+  const anchorDate = new Date(`${anchor}T12:00:00Z`);
+  const rangeStart = new Date(anchorDate);
+  const rangeEnd = new Date(anchorDate);
+  if (view === "week") {
+    rangeStart.setUTCDate(rangeStart.getUTCDate() - ((rangeStart.getUTCDay() + 6) % 7));
+    rangeEnd.setUTCDate(rangeStart.getUTCDate() + 7);
+  } else {
+    rangeEnd.setUTCDate(rangeEnd.getUTCDate() + 1);
+  }
+
+  const dateStart = rangeStart.toISOString();
+  const dateEnd = rangeEnd.toISOString();
+
+  // Fetch data in parallel
+  const [appointments, closures, metrics, vets] = await Promise.all([
+    getCalendarAppointments(s, dateStart, dateEnd),
+    getCalendarClosures(s, dateStart, dateEnd),
+    getDailyMetrics(s, dateStart, dateEnd),
+    getActiveVeterinarians(s),
+  ]);
+
+  // Filter by query params (validated on server)
+  let filteredAppointments = appointments;
+  if (p.status && p.status !== "all") {
+    filteredAppointments = filteredAppointments.filter((a) => a.status === p.status);
+  }
+  if (p.veterinarian) {
+    filteredAppointments = filteredAppointments.filter((a) => a.assigned_user_id === p.veterinarian);
+  }
+
+  // Pending/unassigned queue
+  const pendingQueue = appointments.filter(
+    (a) => a.status === "pending" || (!a.assigned_user_id && a.requested_veterinarian_id),
+  );
+
+  return (
+    <AdminShell session={session}>
+      <h1 className="mb-4 text-3xl font-semibold">Takvim</h1>
+
+      {/* Daily Metrics */}
+      <DailyMetricsBar metrics={metrics} />
+
+      {/* Toolbar */}
+      <CalendarToolbar
+        view={view}
+        anchor={anchor}
+        previous={shiftDate(anchor, -1, view)}
+        next={shiftDate(anchor, 1, view)}
+        today={today}
+        vets={vets}
+        selectedVet={p.veterinarian ?? ""}
+        selectedStatus={p.status ?? "all"}
+      />
+
+      {/* Closure Overlay */}
+      {closures.length > 0 && <ClosureOverlay closures={closures} anchor={anchor} />}
+
+      {/* Pending Queue */}
+      {pendingQueue.length > 0 && <PendingQueue appointments={pendingQueue} vets={vets} />}
+
+      {/* Calendar Views */}
+      <div className="mt-4">
+        {view === "day" && <DayView items={filteredAppointments} />}
+        {view === "week" && <WeekView items={filteredAppointments} anchor={anchor} />}
+        {view === "agenda" && <MobileAgenda items={filteredAppointments} />}
+      </div>
+    </AdminShell>
+  );
+}

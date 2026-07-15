@@ -1,0 +1,94 @@
+-- ═══════════════════════════════════════════════════════════════════
+-- Phase 3.2 Public Booking RLS Role Test Matrix
+--
+-- UPDATED: After Phase 3.2.2 emergency repair.
+-- The Phase 3.2 migration (20260726) did NOT add RLS policies to the
+-- new tables (booking_idempotency, booking_rate_limits, booking_consent_records).
+-- This was a critical gap — anon and authenticated had full table privileges.
+--
+-- The Phase 3.2.2 emergency repair (20260727) fixes this by:
+--   1. Enabling RLS on all three tables
+--   2. Revoking ALL table privileges from anon and authenticated
+--   3. Revoking EXECUTE on helper role functions from anon and PUBLIC
+--   4. Granting helper role functions only to authenticated
+--   5. Preserving anon EXECUTE on create_public_booking(jsonb)
+--
+-- SECURITY DEFINER functions (create_public_booking) bypass RLS because
+-- they execute as table owner. This is intentional and required for the
+-- public booking flow to function.
+-- ═══════════════════════════════════════════════════════════════════
+
+-- ═══════════════════════════════════════════════════════════════════
+-- Post-repair access matrix
+-- ═══════════════════════════════════════════════════════════════════
+
+-- 1. anon: allowed
+--    a. EXECUTE create_public_booking(jsonb) — the sole public booking entry point
+--    b. SELECT appointment_services (is_online_bookable, is_active, archived_at IS NULL)
+--    c. SELECT booking_rules (all columns — public-safe)
+--    d. SELECT profiles (veterinarian, active — only id, full_name)
+--
+-- 2. anon: denied
+--    a. SELECT booking_idempotency — RLS enabled, no privileges granted
+--    b. SELECT booking_rate_limits — RLS enabled, no privileges granted
+--    c. SELECT booking_consent_records — RLS enabled, no privileges granted
+--    d. SELECT owners — PII
+--    e. SELECT pets — PII
+--    f. SELECT appointments — PII + clinical context
+--    g. INSERT/UPDATE/DELETE on any clinical table
+--    h. EXECUTE is_admin(), is_staff(), is_clinical_staff() — revoked from anon
+--    i. SELECT audit_logs — audit data is internal
+--    j. SELECT profiles beyond (id, full_name, role, status) for active vets
+--
+-- 3. authenticated (staff/vet/admin): allowed
+--    a. EXECUTE is_admin(), is_staff(), is_clinical_staff() — granted to authenticated
+--    b. Existing RLS policies on clinical tables apply (is_staff/is_admin checks)
+--    c. NO direct table access to booking_idempotency, booking_rate_limits, booking_consent_records
+--    d. Indirect access via create_public_booking is NOT granted (anon only)
+--
+-- 4. SECURITY DEFINER functions
+--    a. create_public_booking(jsonb) — executes as table owner, bypasses RLS
+--    b. All functions use SET search_path = '' to prevent search-path injection
+--    c. No service role or secrets exposed
+
+-- ═══════════════════════════════════════════════════════════════════
+-- SQL assertions (run after substitution in staging)
+-- ═══════════════════════════════════════════════════════════════════
+
+-- Anon can execute create_public_booking:
+--   SET ROLE anon;
+--   SELECT public.create_public_booking('{"p_honeypot": ""}'::jsonb);
+--   Expected: a validation error (not a permission error)
+
+-- Anon cannot SELECT booking_idempotency:
+--   SET ROLE anon;
+--   SELECT count(*) FROM public.booking_idempotency;
+--   Expected: ERROR: permission denied for table booking_idempotency
+
+-- Anon cannot execute is_admin():
+--   SET ROLE anon;
+--   SELECT public.is_admin();
+--   Expected: ERROR: permission denied for function is_admin
+
+-- Authenticated can execute is_admin():
+--   SET ROLE authenticated;
+--   SELECT public.is_admin();
+--   Expected: returns false (no JWT claims in SET ROLE context)
+
+-- RLS enabled on all three tables:
+--   SELECT relname, relrowsecurity FROM pg_class
+--   WHERE relname IN ('booking_idempotency', 'booking_rate_limits', 'booking_consent_records');
+--   Expected: all three show relrowsecurity = true
+
+-- ═══════════════════════════════════════════════════════════════════
+-- Notes on RLS expectations
+-- ═══════════════════════════════════════════════════════════════════
+--
+-- After Phase 3.2.2 emergency repair:
+--   - RLS is enabled on booking_idempotency, booking_rate_limits, booking_consent_records
+--   - No direct table privileges for anon or authenticated
+--   - create_public_booking(jsonb) works via SECURITY DEFINER (table owner bypass)
+--   - Helper role functions (is_admin, is_staff, is_clinical_staff) restricted to authenticated
+--   - No broad staff/veterinarian policies added
+--   - FORCE ROW LEVEL SECURITY is NOT used (would break SECURITY DEFINER)
+-- ═══════════════════════════════════════════════════════════════════

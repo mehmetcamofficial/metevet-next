@@ -104,7 +104,7 @@ Compact rounded-full badges showing only values from `rules` and `result.service
 - [ ] Slot buttons: verify disabled, no click action
 
 ## 18. Definition of Done Score
-**6/10 gates verified** (UX refinement, no migration, auth unchanged, tests pass, lint/ts/build pass, journal complete).  
+**6/10 gates verified** (UX refinement, no migration, auth unchanged, tests pass, lint/ts/build pass, journal complete).
 **4 gates pending**: performance review pass (component-level only), Vercel deployment, manual browser/mobile QA, veterinarian/user validation.
 
 ## 19. Production Readiness and Commit Recommendation

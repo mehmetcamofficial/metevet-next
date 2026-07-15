@@ -1,10 +1,10 @@
 # LOOP REPORT — Phase 3.1.1: Online Booking Data Foundation
 
-**Date:** 2026-07-24  
-**Methodology:** Loop Engineering  
-**Phase:** 3.1.1  
-**Status:** PASS WITH WARNINGS — migration applied remotely; 12 non-blocking concerns assigned to Phase 3.1.2 backlog  
-**Reviewer:** Autonomous repair cycle + 3 independent subagent reviews  
+**Date:** 2026-07-24
+**Methodology:** Loop Engineering
+**Phase:** 3.1.1
+**Status:** PASS WITH WARNINGS — migration applied remotely; 12 non-blocking concerns assigned to Phase 3.1.2 backlog
+**Reviewer:** Autonomous repair cycle + 3 independent subagent reviews
 
 ---
 
@@ -212,16 +212,16 @@ Root cause: `va_veterinarian_role` CHECK constraint contained `EXISTS (SELECT 1 
 
 Three parallel subagent reviews were conducted:
 
-**Security Review** — 2 CRITICAL, 6 CONCERN, 6 PASS  
-- CRITICAL: `generate_booking_reference()` missing search_path → **FIXED**  
+**Security Review** — 2 CRITICAL, 6 CONCERN, 6 PASS
+- CRITICAL: `generate_booking_reference()` missing search_path → **FIXED**
 - CRITICAL: `veterinarian_id` ON DELETE CASCADE → **FIXED (RESTRICT)**
 
-**Database Review** — 1 CRITICAL, 14 CONCERN, 12 PASS  
-- CRITICAL: No exclusion constraint on clinic_closures overlaps → **TRACKED (C1)**  
+**Database Review** — 1 CRITICAL, 14 CONCERN, 12 PASS
+- CRITICAL: No exclusion constraint on clinic_closures overlaps → **TRACKED (C1)**
 - Key CONCERN: audit action naming, ELSE-fail, daterange semantics → **FIXED**
 
-**UX/Production Review** — 1 CRITICAL (stub), 11 CONCERN, 9 PASS  
-- CRITICAL: availability engine stub → **ACCEPTED (intentional, Phase 3.1.3)**  
+**UX/Production Review** — 1 CRITICAL (stub), 11 CONCERN, 9 PASS
+- CRITICAL: availability engine stub → **ACCEPTED (intentional, Phase 3.1.3)**
 - Key CONCERN: validation gaps, duplicate auth → **TRACKED (C4-C12)**
 
 ---
