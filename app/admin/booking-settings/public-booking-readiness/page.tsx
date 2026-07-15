@@ -170,13 +170,20 @@ export default async function PublicBookingReadinessPage() {
         </section>
 
         <section className="rounded-2xl bg-white p-6">
-          <h2 className="text-xl font-semibold">Migration Durumu</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Migration Durumu</h2>
+            <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
+              Manuel doğrulama gerekli
+            </span>
+          </div>
           <p className="mt-3 text-sm text-[#526a64]">
-            Migration durumu güvenli şekilde tespit edilemiyor.
+            Migration geçmişi uygulama içinden otomatik olarak doğrulanmaz.
           </p>
           <p className="mt-2 text-sm text-[#526a64]">
-            <code className="rounded bg-gray-100 px-2 py-1 text-xs">supabase migration list</code>{" "}
-            komutu ile doğrulayın.
+            Son manuel doğrulamada yerel ve uzak migration geçmişi eşleşiyordu. Yeni migration eklenirse{" "}
+            <code className="rounded bg-gray-100 px-2 py-1 text-xs">npx supabase migration list</code> ve{" "}
+            <code className="rounded bg-gray-100 px-2 py-1 text-xs">npx supabase db push --dry-run</code>{" "}
+            komutlarıyla yeniden kontrol edin.
           </p>
         </section>
       </div>

@@ -25,3 +25,5 @@ Phase-by-phase record of design decisions, migration issues, and resolution rati
 | [040-R](040-phase-3-4-loop-report.md) | 3.4 | Loop Report — 20-section | 2026-07-25 |
 | [041](041-phase-3-5-reception-workspace.md) | 3.5 | Reception Workspace — PASS WITH WARNINGS (7/10) | 2026-07-25 |
 | [041-R](041-phase-3-5-loop-report.md) | 3.5 | Loop Report — 20-section | 2026-07-25 |
+| [042](042-phase-3-6-veterinarian-workspace.md) | 3.6 | Veterinarian Workspace — PASS WITH WARNINGS (7/10) | 2026-07-25 |
+| [042-R](042-phase-3-6-loop-report.md) | 3.6 | Loop Report — 20-section | 2026-07-25 |

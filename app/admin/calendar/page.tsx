@@ -1,5 +1,5 @@
 import { AdminShell } from "@/src/components/admin/admin-shell";
-import { CalendarToolbar } from "@/src/components/admin/calendar/calendar-toolbar";
+import { CalendarToolbarClient } from "@/src/components/admin/calendar/calendar-toolbar-client";
 import { DayView } from "@/src/components/admin/calendar/day-view";
 import { WeekView } from "@/src/components/admin/calendar/week-view";
 import { MobileAgenda } from "@/src/components/admin/calendar/mobile-agenda";
@@ -83,7 +83,7 @@ export default async function CalendarPage({
       <DailyMetricsBar metrics={metrics} />
 
       {/* Toolbar */}
-      <CalendarToolbar
+      <CalendarToolbarClient
         view={view}
         anchor={anchor}
         previous={shiftDate(anchor, -1, view)}
