@@ -21,3 +21,7 @@ Phase-by-phase record of design decisions, migration issues, and resolution rati
 | [038](037-phase-3-2-1-production-hardening.md) | 3.2.2 | Public Booking RLS Emergency Repair — BLOCKED | 2026-07-25 |
 | [039](038-phase-3-3-clinic-calendar.md) | 3.3 | Clinic Calendar & Daily Operations — PASS WITH WARNINGS (7/10) | 2026-07-25 |
 | [039-R](038-phase-3-3-loop-report.md) | 3.3 | Loop Report — 20-section | 2026-07-25 |
+| [040](040-phase-3-4-clinic-quick-actions.md) | 3.4 | Clinic Quick Actions — PASS WITH WARNINGS (7/10) | 2026-07-25 |
+| [040-R](040-phase-3-4-loop-report.md) | 3.4 | Loop Report — 20-section | 2026-07-25 |
+| [041](041-phase-3-5-reception-workspace.md) | 3.5 | Reception Workspace — PASS WITH WARNINGS (7/10) | 2026-07-25 |
+| [041-R](041-phase-3-5-loop-report.md) | 3.5 | Loop Report — 20-section | 2026-07-25 |
