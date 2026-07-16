@@ -29,3 +29,7 @@ Phase-by-phase record of design decisions, migration issues, and resolution rati
 | [042-R](042-phase-3-6-loop-report.md) | 3.6 | Loop Report — 20-section | 2026-07-25 |
 | [043](043-phase-3-7-patient-check-in-flow.md) | 3.7 | Patient Check-in and Clinic Flow — PASS WITH WARNINGS | 2026-07-16 |
 | [043-R](043-phase-3-7-loop-report.md) | 3.7 | Loop Report — 20-section | 2026-07-16 |
+| [044](044-phase-3-7-1-auth-cookie-hardening.md) | 3.7.1 | Auth Cookie Hardening — PASS WITH WARNINGS (7/10) | 2026-07-25 |
+| [044-R](044-phase-3-7-1-loop-report.md) | 3.7.1 | Loop Report — 20-section | 2026-07-25 |
+| [045](045-phase-4-1-electronic-medical-record.md) | 4.1 | Electronic Medical Record — PASS WITH WARNINGS (7/10) | 2026-07-25 |
+| [045-R](045-phase-4-1-loop-report.md) | 4.1 | Loop Report — 20-section | 2026-07-25 |
