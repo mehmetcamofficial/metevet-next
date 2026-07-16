@@ -1,11 +1,10 @@
 "use server";
 
-import { redirect } from "next/navigation";
-
 import { createClient } from "@/src/lib/supabase/server";
 
 export type LoginState = {
   error: string | null;
+  redirectTo?: string;
 };
 
 export async function loginAction(
@@ -46,5 +45,15 @@ export async function loginAction(
     return { error: "Hesabınız aktif değil veya geçerli bir personel profili bulunmuyor." };
   }
 
-  redirect("/admin");
+  // Determine redirect target based on role
+  let redirectTo = "/admin";
+  if (profile.role === "staff") {
+    redirectTo = "/admin/reception";
+  } else if (profile.role === "veterinarian") {
+    redirectTo = "/admin/veterinarian";
+  }
+
+  // Return redirect target instead of calling redirect()
+  // The client component will handle the redirect after cookies are set
+  return { error: null, redirectTo };
 }

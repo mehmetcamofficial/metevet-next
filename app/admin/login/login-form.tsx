@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import Link from "next/link";
 
 import { loginAction, type LoginState } from "./actions";
@@ -12,6 +12,15 @@ export function LoginForm() {
     loginAction,
     initialState,
   );
+
+  // Handle redirect after successful login
+  useEffect(() => {
+    if (state.redirectTo) {
+      // Use window.location.href to trigger a full page reload
+      // This ensures the proxy/middleware runs and refreshes the session
+      window.location.href = state.redirectTo;
+    }
+  }, [state.redirectTo]);
 
   return (
     <form action={formAction} className="mt-8 space-y-5">
