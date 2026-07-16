@@ -42,3 +42,4 @@ next-env.d.ts
 
 # Generated local PDF previews
 output/
+.qwen/
