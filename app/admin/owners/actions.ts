@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { requireStaff } from "@/src/lib/auth/require-staff";
 import { canPermanentlyDelete, canWriteClinicalRecords } from "@/src/lib/admin/permissions";
 import { normalizePhone } from "@/src/lib/admin/records";
-import { createClient } from "@/src/lib/supabase/server";
+import { createServerActionClient } from "@/src/lib/supabase/server-action";
 
 export type OwnerFormState = { message: string | null; errors?: Record<string, string> };
 const denied: OwnerFormState = { message: "Bu işlem için yetkiniz bulunmuyor." };
@@ -34,7 +34,7 @@ export async function createOwner(_state: OwnerFormState, formData: FormData): P
   const values = ownerValues(formData);
   const errors = validateOwner(values);
   if (Object.keys(errors).length) return { message: "Lütfen işaretli alanları düzeltin.", errors };
-  const supabase = await createClient();
+  const supabase = await createServerActionClient();
   if (!supabase || !values.phone) return failed;
   const { data: duplicate } = await supabase.from("owners").select("id").eq("phone", values.phone).maybeSingle();
   if (duplicate) return { message: "Bu telefon numarasıyla kayıtlı başka bir hayvan sahibi var.", errors: { phone: "Tekrarlanan telefon numarası." } };
@@ -51,7 +51,7 @@ export async function updateOwner(id: string, _state: OwnerFormState, formData: 
   const values = ownerValues(formData);
   const errors = validateOwner(values);
   if (Object.keys(errors).length) return { message: "Lütfen işaretli alanları düzeltin.", errors };
-  const supabase = await createClient();
+  const supabase = await createServerActionClient();
   if (!supabase || !values.phone) return failed;
   const { data: duplicate } = await supabase.from("owners").select("id").eq("phone", values.phone).neq("id", id).limit(1).maybeSingle();
   if (duplicate) return { message: "Bu telefon numarasıyla kayıtlı başka bir hayvan sahibi var.", errors: { phone: "Tekrarlanan telefon numarası." } };
@@ -68,7 +68,7 @@ export async function updateOwner(id: string, _state: OwnerFormState, formData: 
 async function ownerLifecycle(id: string, action: "archive" | "restore" | "delete") {
   const session = await requireStaff();
   if (!canPermanentlyDelete(session.profile.role)) throw new Error("Bu işlem için yetkiniz bulunmuyor.");
-  const supabase = await createClient(); if (!supabase) throw new Error("İşlem tamamlanamadı.");
+  const supabase = await createServerActionClient(); if (!supabase) throw new Error("İşlem tamamlanamadı.");
   if (action === "delete") {
     const { error } = await supabase.from("owners").delete().eq("id", id); if (error) throw new Error("Kayıt silinemedi. Bağlı kayıtları kontrol edin.");
   } else {

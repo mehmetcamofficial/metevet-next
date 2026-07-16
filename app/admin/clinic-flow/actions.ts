@@ -15,7 +15,7 @@ import {
 import { canWriteExamination } from "@/src/lib/admin/examinations";
 import { canTransitionStatus } from "@/src/lib/admin/appointments";
 import { requireStaff } from "@/src/lib/auth/require-staff";
-import { createClient } from "@/src/lib/supabase/server";
+import { createServerActionClient } from "@/src/lib/supabase/server-action";
 import type { AppointmentStatus, Json } from "@/src/types/database";
 
 export type ClinicFlowResult = {
@@ -87,7 +87,7 @@ async function applyFlowTransition(
   }
 
   const session = await requireStaff();
-  const s = await createClient();
+  const s = await createServerActionClient();
   if (!s) return FAILED;
 
   const row = await loadAppointment(s, appointmentId);
@@ -305,7 +305,7 @@ export async function startExaminationFromFlow(
     return { ok: false, message: "Bu işlem için yetkiniz bulunmuyor." };
   }
 
-  const s = await createClient();
+  const s = await createServerActionClient();
   if (!s) return FAILED;
 
   const row = await loadAppointment(s, appointmentId);

@@ -22,7 +22,7 @@ import {
 } from "@/src/lib/admin/documents/document-storage";
 import { isDocumentType, safeLanguage } from "@/src/lib/admin/documents/document-validation";
 import { requireStaff } from "@/src/lib/auth/require-staff";
-import { createClient } from "@/src/lib/supabase/server";
+import { createServerActionClient } from "@/src/lib/supabase/server-action";
 
 export type DocumentFormState = { message: string | null };
 
@@ -41,7 +41,7 @@ export async function generateDocument(
   if (internal && !canIncludeInternalNotes(session.profile.role)) {
     return { message: "Dahili notları yalnızca yönetici ekleyebilir." };
   }
-  const s = await createClient();
+  const s = await createServerActionClient();
   if (!s) return { message: "Belge üretilemedi." };
   const reference = createDocumentNumber();
   let storagePath: string | null = null;
@@ -113,7 +113,7 @@ export async function generateDocument(
 
 export async function archiveDocument(id: string, restore = false) {
   const session = await requireStaff();
-  const s = await createClient();
+  const s = await createServerActionClient();
   if (!s) throw new Error("İşlem tamamlanamadı.");
   const { data } = await s.from("generated_documents").select("generated_by,status,document_type,file_name").eq("id", id).single();
   if (!data || !canArchiveDocument(session.profile.role, data.generated_by, session.id)) throw new Error("Yetkiniz bulunmuyor.");
@@ -130,7 +130,7 @@ export async function archiveDocument(id: string, restore = false) {
 export async function deleteDocument(id: string) {
   const session = await requireStaff();
   if (!canDeleteDocuments(session.profile.role)) throw new Error("Yetkiniz bulunmuyor.");
-  const s = await createClient();
+  const s = await createServerActionClient();
   if (!s) throw new Error("İşlem tamamlanamadı.");
   const { data } = await s.from("generated_documents").select("document_type,file_name,storage_path,status").eq("id", id).single();
   if (!data) throw new Error("Belge bulunamadı.");
@@ -149,7 +149,7 @@ export async function deleteDocument(id: string) {
 
 export async function regenerateDocument(id: string) {
   const session = await requireStaff();
-  const s = await createClient();
+  const s = await createServerActionClient();
   if (!s) throw new Error("İşlem tamamlanamadı.");
   const { data: old } = await s.from("generated_documents").select("*").eq("id", id).single();
   if (!old || !canGenerateDocument(session.profile.role, old.document_type)) throw new Error("Yetkiniz bulunmuyor.");

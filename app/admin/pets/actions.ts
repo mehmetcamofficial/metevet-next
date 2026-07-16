@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { requireStaff } from "@/src/lib/auth/require-staff";
 import { canPermanentlyDelete, canWriteClinicalRecords } from "@/src/lib/admin/permissions";
 import { isPetSpecies, normalizeMicrochip } from "@/src/lib/admin/records";
-import { createClient } from "@/src/lib/supabase/server";
+import { createServerActionClient } from "@/src/lib/supabase/server-action";
 import type { PetSex } from "@/src/types/database";
 
 export type PetFormState = { message: string | null; errors?: Record<string, string> };
@@ -27,7 +27,7 @@ function validatePet(values: ReturnType<typeof petValues>) {
   return errors;
 }
 
-async function duplicateChip(supabase: NonNullable<Awaited<ReturnType<typeof createClient>>>, chip: string | null, excludedId?: string) {
+async function duplicateChip(supabase: NonNullable<Awaited<ReturnType<typeof createServerActionClient>>>, chip: string | null, excludedId?: string) {
   if (!chip) return false;
   let query = supabase.from("pets").select("id").eq("microchip_number", chip);
   if (excludedId) query = query.neq("id", excludedId);
@@ -38,7 +38,7 @@ export async function createPet(_state: PetFormState, formData: FormData): Promi
   const session = await requireStaff(); if (!canWriteClinicalRecords(session.profile.role)) return denied;
   const values = petValues(formData); const errors = validatePet(values);
   if (Object.keys(errors).length) return { message: "Lütfen işaretli alanları düzeltin.", errors };
-  const supabase = await createClient(); if (!supabase) return failed;
+  const supabase = await createServerActionClient(); if (!supabase) return failed;
   if (await duplicateChip(supabase, values.microchip_number)) return { message: "Bu mikroçip numarası başka bir hayvana ait.", errors: { microchipNumber: "Tekrarlanan mikroçip numarası." } };
   const { data, error } = await supabase.from("pets").insert(values).select("id").single(); if (error || !data) return failed;
   await supabase.from("audit_logs").insert({ actor_user_id: session.id, action: "pet_created", entity_type: "pet", entity_id: data.id, metadata: { fields: ["owner_id", "name", "species", ...(values.microchip_number ? ["microchip_number"] : [])] } });
@@ -49,7 +49,7 @@ export async function updatePet(id: string, _state: PetFormState, formData: Form
   const session = await requireStaff(); if (!canWriteClinicalRecords(session.profile.role)) return denied;
   const values = petValues(formData); const errors = validatePet(values);
   if (Object.keys(errors).length) return { message: "Lütfen işaretli alanları düzeltin.", errors };
-  const supabase = await createClient(); if (!supabase) return failed;
+  const supabase = await createServerActionClient(); if (!supabase) return failed;
   if (await duplicateChip(supabase, values.microchip_number, id)) return { message: "Bu mikroçip numarası başka bir hayvana ait.", errors: { microchipNumber: "Tekrarlanan mikroçip numarası." } };
   const { data: current } = await supabase.from("pets").select("owner_id, name, species, breed, sex, birth_date, microchip_number, notes").eq("id", id).single(); if (!current) return failed;
   const { error } = await supabase.from("pets").update(values).eq("id", id); if (error) return failed;
@@ -60,7 +60,7 @@ export async function updatePet(id: string, _state: PetFormState, formData: Form
 
 async function petLifecycle(id: string, action: "archive" | "restore" | "delete") {
   const session = await requireStaff(); if (!canPermanentlyDelete(session.profile.role)) throw new Error("Bu işlem için yetkiniz bulunmuyor.");
-  const supabase = await createClient(); if (!supabase) throw new Error("İşlem tamamlanamadı.");
+  const supabase = await createServerActionClient(); if (!supabase) throw new Error("İşlem tamamlanamadı.");
   if (action === "delete") { const { error } = await supabase.from("pets").delete().eq("id", id); if (error) throw new Error("Kayıt silinemedi. Bağlı kayıtları kontrol edin."); }
   else { const { error } = await supabase.from("pets").update({ archived_at: action === "archive" ? new Date().toISOString() : null }).eq("id", id); if (error) throw new Error("İşlem tamamlanamadı."); }
   await supabase.from("audit_logs").insert({ actor_user_id: session.id, action: `pet_${action}d`, entity_type: "pet", entity_id: id, metadata: action === "delete" ? { permanent: true } : { fields: ["archived_at"] } });

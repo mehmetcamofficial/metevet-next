@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/src/lib/auth/require-admin";
-import { createClient } from "@/src/lib/supabase/server";
+import { createServerActionClient } from "@/src/lib/supabase/server-action";
 import {
   validateServiceInsert,
   validateAvailability,
@@ -67,7 +67,7 @@ export async function createService(
   const validationError = validateServiceInsert(input);
   if (validationError) return { message: validationError };
 
-  const s = await createClient();
+  const s = await createServerActionClient();
   if (!s) return { message: "İşlem tamamlanamadı." };
 
   const result = await s
@@ -120,7 +120,7 @@ export async function updateService(
   const validationError = validateServiceInsert(input);
   if (validationError) return { message: validationError };
 
-  const s = await createClient();
+  const s = await createServerActionClient();
   if (!s) return { message: "İşlem tamamlanamadı." };
 
   const result = await s
@@ -148,7 +148,7 @@ export async function updateService(
 
 export async function archiveService(id: string) {
   const session = await requireAdmin();
-  const s = await createClient();
+  const s = await createServerActionClient();
   if (!s) throw new Error("İşlem başarısız.");
 
   const { error } = await s
@@ -173,7 +173,7 @@ export async function archiveService(id: string) {
 
 export async function restoreService(id: string) {
   const session = await requireAdmin();
-  const s = await createClient();
+  const s = await createServerActionClient();
   if (!s) throw new Error("İşlem başarısız.");
 
   const { error } = await s
@@ -266,7 +266,7 @@ export async function saveAvailability(
   if (Object.keys(errors).length)
     return { message: "Günleri düzeltin.", errors };
 
-  const s = await createClient();
+  const s = await createServerActionClient();
   if (!s) return { message: "İşlem tamamlanamadı." };
 
   // Verify veterinarian is active vet
@@ -350,7 +350,7 @@ export async function createClosure(
   const validationError = validateClosure(input);
   if (validationError) return { message: validationError };
 
-  const s = await createClient();
+  const s = await createServerActionClient();
   if (!s) return { message: "İşlem tamamlanamadı." };
 
   // Convert Istanbul datetime-local to ISO
@@ -413,7 +413,7 @@ export async function updateClosure(
   const validationError = validateClosure(input);
   if (validationError) return { message: validationError };
 
-  const s = await createClient();
+  const s = await createServerActionClient();
   if (!s) return { message: "İşlem tamamlanamadı." };
 
   // Convert Istanbul datetime-local to ISO
@@ -458,7 +458,7 @@ export async function updateClosure(
 
 export async function archiveClosure(id: string) {
   const session = await requireAdmin();
-  const s = await createClient();
+  const s = await createServerActionClient();
   if (!s) throw new Error("İşlem başarısız.");
 
   const { error } = await s
@@ -483,7 +483,7 @@ export async function archiveClosure(id: string) {
 
 export async function restoreClosure(id: string) {
   const session = await requireAdmin();
-  const s = await createClient();
+  const s = await createServerActionClient();
   if (!s) throw new Error("İşlem başarısız.");
 
   const { error } = await s
@@ -529,7 +529,7 @@ export async function updateBookingRules(
   const validationError = validateBookingRules(input);
   if (validationError) return { message: validationError };
 
-  const s = await createClient();
+  const s = await createServerActionClient();
   if (!s) return { message: "İşlem tamamlanamadı." };
 
   const result = await s

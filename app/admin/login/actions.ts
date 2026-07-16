@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/src/lib/supabase/server";
+import { createServerActionClient } from "@/src/lib/supabase/server-action";
 
 export type LoginState = {
   error: string | null;
@@ -20,7 +20,7 @@ export async function loginAction(
     return { error: "E-posta ve şifre alanları zorunludur." };
   }
 
-  const supabase = await createClient();
+  const supabase = await createServerActionClient();
 
   if (!supabase) {
     return {
