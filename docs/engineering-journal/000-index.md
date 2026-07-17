@@ -33,3 +33,7 @@ Phase-by-phase record of design decisions, migration issues, and resolution rati
 | [044-R](044-phase-3-7-1-loop-report.md) | 3.7.1 | Loop Report — 20-section | 2026-07-25 |
 | [045](045-phase-4-1-electronic-medical-record.md) | 4.1 | Electronic Medical Record — PASS WITH WARNINGS (7/10) | 2026-07-25 |
 | [045-R](045-phase-4-1-loop-report.md) | 4.1 | Loop Report — 20-section | 2026-07-25 |
+| [046](046-phase-4-2-clinical-alerts-preventive-care.md) | 4.2 | Clinical Alerts & Preventive Care — PASS WITH WARNINGS (7/10) | 2026-07-25 |
+| [046-R](046-phase-4-2-loop-report.md) | 4.2 | Loop Report — 20-section | 2026-07-25 |
+| [047](047-phase-3-2-1-cinematic-hero.md) | 3.2.1 | Cinematic Homepage Scrollytelling — PASS WITH WARNINGS (7/10) | 2026-07-26 |
+| [047-R](047-phase-3-2-1-loop-report.md) | 3.2.1 | Loop Report — 16-section | 2026-07-26 |

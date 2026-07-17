@@ -1,4 +1,4 @@
-import { Hero } from "@/src/components/home/hero";
+import { CinematicHero } from "@/src/components/cinematic/CinematicHero";
 import { TrustStrip } from "@/src/components/home/trust-strip";
 import { ServicesPreview } from "@/src/components/home/services-preview";
 import { DoctorProfile } from "@/src/components/home/doctor-profile";
@@ -62,17 +62,19 @@ export default async function LocaleHomePage({ params }: { params: Promise<{ loc
       <Navbar locale={resolvedLocale} />
       <main id="main-content">
         <PageTransition>
-          <Hero locale={resolvedLocale} />
-          <TrustStrip locale={resolvedLocale} />
-          <ServicesPreview locale={resolvedLocale} />
-          <DoctorProfile locale={resolvedLocale} />
-          <GallerySection />
-          <CarePhilosophy locale={resolvedLocale} />
-          <AppointmentCTA locale={resolvedLocale} />
-          <BlogPreview locale={resolvedLocale} />
-          <Faq locale={resolvedLocale} />
-          <ContactPreview locale={resolvedLocale} />
-          <JsonLd data={organizationJsonLd} />
+          <CinematicHero locale={resolvedLocale} />
+          <div id="home-content">
+            <TrustStrip locale={resolvedLocale} />
+            <ServicesPreview locale={resolvedLocale} />
+            <DoctorProfile locale={resolvedLocale} />
+            <GallerySection />
+            <CarePhilosophy locale={resolvedLocale} />
+            <AppointmentCTA locale={resolvedLocale} />
+            <BlogPreview locale={resolvedLocale} />
+            <Faq locale={resolvedLocale} />
+            <ContactPreview locale={resolvedLocale} />
+            <JsonLd data={organizationJsonLd} />
+          </div>
         </PageTransition>
       </main>
       <Footer locale={resolvedLocale} />
