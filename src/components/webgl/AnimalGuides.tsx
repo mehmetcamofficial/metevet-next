@@ -27,21 +27,15 @@ const CAT_WAYPOINTS = [
   [3.1, -2.1, 0.62],
 ] as const;
 
-const _wpA = new Vector3();
-const _wpB = new Vector3();
-const _wpResult = new Vector3();
-
 function waypointPosition(points: readonly (readonly [number, number, number])[], progress: number) {
   const scaled = MathUtils.clamp(progress, 0, 1) * (points.length - 1);
   const index = Math.min(points.length - 2, Math.floor(scaled));
   const alpha = scaled - index;
-  _wpA.set(...points[index]);
-  _wpB.set(...points[index + 1]);
-  _wpResult.copy(_wpA).lerp(_wpB, alpha);
-  _wpResult.x = MathUtils.clamp(_wpResult.x, -3.4, 3.4);
-  _wpResult.y = MathUtils.clamp(_wpResult.y, -2.2, -1.9);
-  _wpResult.z = MathUtils.clamp(_wpResult.z, ANIMAL_Z_MIN, ANIMAL_Z_MAX);
-  return _wpResult;
+  const position = new Vector3(...points[index]).lerp(new Vector3(...points[index + 1]), alpha);
+  position.x = MathUtils.clamp(position.x, -3.4, 3.4);
+  position.y = MathUtils.clamp(position.y, -2.2, -1.9);
+  position.z = MathUtils.clamp(position.z, ANIMAL_Z_MIN, ANIMAL_Z_MAX);
+  return position;
 }
 
 function ContactShadow() {

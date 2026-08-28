@@ -50,9 +50,7 @@ export function WebGLProvider({
   }, []);
 
   useEffect(() => {
-    let frame: number | null = null;
     const update = () => {
-      frame = null;
       const root = rootRef.current;
       if (!root) return;
       const rect = root.getBoundingClientRect();
@@ -61,15 +59,9 @@ export function WebGLProvider({
         : (window.innerHeight - rect.top) / Math.max(1, window.innerHeight + rect.height);
       setProgress(Math.min(1, Math.max(0, raw)));
     };
-    const onScroll = () => {
-      if (frame === null) frame = window.requestAnimationFrame(update);
-    };
     update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (frame !== null) window.cancelAnimationFrame(frame);
-    };
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
   }, [journey]);
 
   const showCanvas = scene !== "clinic" && ready && quality !== "low" && active;

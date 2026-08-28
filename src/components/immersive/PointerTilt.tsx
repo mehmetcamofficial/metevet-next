@@ -93,9 +93,6 @@ export function PointerTilt({
 
     return () => {
       cancelled = true;
-      quickX?.kill();
-      quickY?.kill();
-      quickZ?.kill();
       if (onMove) outer.removeEventListener("pointermove", onMove);
       if (onLeave) outer.removeEventListener("pointerleave", onLeave);
       if (motion) motion.style.transform = "";

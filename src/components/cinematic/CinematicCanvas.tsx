@@ -113,10 +113,8 @@ export function CinematicCanvas({
 
     let raf: number | null = null;
     let previous: number | null = null;
-    let stopped = false;
 
     const paint = (timestamp: number) => {
-      if (stopped || document.hidden) return;
       const deltaSeconds = Math.min((timestamp - (previous ?? timestamp)) / 1000, 0.05);
       previous = timestamp;
       const alpha = 1 - Math.exp(-DAMPING_RESPONSE * deltaSeconds);
@@ -278,22 +276,8 @@ export function CinematicCanvas({
     dirtyRef.current = true;
     raf = window.requestAnimationFrame(paint);
 
-    const onVisibilityChange = () => {
-      if (document.hidden) {
-        stopped = true;
-        if (raf !== null) window.cancelAnimationFrame(raf);
-        raf = null;
-      } else {
-        stopped = false;
-        previous = null;
-        raf = window.requestAnimationFrame(paint);
-      }
-    };
-    document.addEventListener("visibilitychange", onVisibilityChange);
-
     return () => {
       if (raf !== null) window.cancelAnimationFrame(raf);
-      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [active, getDrawableFrame, maintainDecodeWindow, pointerRef, targetFrameRef]);
 

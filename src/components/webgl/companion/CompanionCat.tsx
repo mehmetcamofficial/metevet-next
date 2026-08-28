@@ -79,7 +79,6 @@ export function CompanionCat({
   const normalizationRoot = useRef<Group>(null);
   const orientationRoot = useRef<Group>(null);
   const gltf = useGLTF(COMPANION_MODEL_PATH);
-  const clonedMaterials = useRef<Mesh["material"][]>([]);
   const clonedScene = useMemo(() => {
     const instance = clone(gltf.scene);
     instance.name = "MeteVetCompanionCatClone";
@@ -91,16 +90,6 @@ export function CompanionCat({
     });
     return instance;
   }, [gltf.scene]);
-
-  useEffect(() => {
-    const materials: Mesh["material"][] = [];
-    clonedScene.traverse((object) => {
-      if (object instanceof Mesh) {
-        materials.push(Array.isArray(object.material) ? [...object.material] : object.material);
-      }
-    });
-    clonedMaterials.current = materials;
-  }, [clonedScene]);
   const { actions, names } = useAnimations(gltf.animations, clonedScene);
   const actionsRef = useRef(actions);
   const activeAction = useRef<AnimationAction | null>(null);
@@ -455,21 +444,13 @@ export function CompanionCat({
     }
 
     normalizeAndValidate();
-    let resizeFrame: number | null = null;
-    const throttledNormalize = () => {
-      if (resizeFrame === null) resizeFrame = requestAnimationFrame(() => {
-        resizeFrame = null;
-        normalizeAndValidate();
-      });
-    };
-    window.addEventListener("resize", throttledNormalize);
+    window.addEventListener("resize", normalizeAndValidate);
     window.addEventListener(
       "metevet-companion-revalidate",
       normalizeAndValidate,
     );
     return () => {
-      window.removeEventListener("resize", throttledNormalize);
-      if (resizeFrame !== null) cancelAnimationFrame(resizeFrame);
+      window.removeEventListener("resize", normalizeAndValidate);
       window.removeEventListener(
         "metevet-companion-revalidate",
         normalizeAndValidate,
@@ -478,14 +459,6 @@ export function CompanionCat({
       if (importedFloor && previousFloorVisibility !== undefined) {
         importedFloor.visible = previousFloorVisibility;
       }
-      for (const mat of clonedMaterials.current) {
-        if (Array.isArray(mat)) {
-          for (const m of mat) m.dispose();
-        } else {
-          mat.dispose();
-        }
-      }
-      clonedMaterials.current = [];
       for (const { mesh, material } of restoredMaterials) {
         if (mesh.material instanceof MeshBasicMaterial) mesh.material.dispose();
         mesh.material = material;

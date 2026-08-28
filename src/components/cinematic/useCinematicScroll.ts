@@ -42,8 +42,8 @@ export function useCinematicScroll(
     };
 
     window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule, { passive: true });
-    window.addEventListener("orientationchange", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    window.addEventListener("orientationchange", schedule);
     measure();
 
     return () => {

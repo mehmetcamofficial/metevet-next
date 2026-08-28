@@ -52,7 +52,6 @@ export const CinematicOverlay = forwardRef<CinematicOverlayHandle, Props>(
           element.style.transform = `translate3d(0, ${offset}px, 0)`;
           element.style.filter = blur > 0.05 ? `blur(${blur}px)` : "none";
           element.style.visibility = opacity < 0.01 ? "hidden" : "visible";
-          element.style.willChange = opacity > 0.01 ? "opacity, transform" : "auto";
         }
       },
     }));
@@ -66,7 +65,7 @@ export const CinematicOverlay = forwardRef<CinematicOverlayHandle, Props>(
         <div className="w-full max-w-4xl text-center">
           <div
             ref={assign("intro")}
-            className="pointer-events-auto"
+            className="pointer-events-auto will-change-[opacity,transform]"
           >
             <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-[#0D2922]/45 px-3 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-[#E3C27E] backdrop-blur-sm sm:text-sm sm:tracking-[0.3em]">
               <Sparkles size={14} aria-hidden="true" />
@@ -147,7 +146,7 @@ const StoryLine = forwardRef<
     <div
       ref={ref}
       style={{ opacity: 0, visibility: "hidden" }}
-      className="absolute inset-0 flex flex-col items-center justify-center px-6"
+      className="absolute inset-0 flex flex-col items-center justify-center px-6 will-change-[opacity,transform,filter]"
     >
       <p
         className={`mx-auto max-w-2xl font-semibold tracking-[-0.02em] text-white drop-shadow-[0_2px_20px_rgba(6,26,20,0.6)] ${

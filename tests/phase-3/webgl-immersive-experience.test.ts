@@ -183,7 +183,7 @@ test("animal guides remain clamped in front of the photo planes at stable scale"
   const guides = webgl("AnimalGuides.tsx");
   assert.match(guides, /ANIMAL_Z_MIN = 0\.48/);
   assert.match(guides, /ANIMAL_Z_MAX = 0\.78/);
-  assert.match(guides, /MathUtils\.clamp\(_wpResult\.z, ANIMAL_Z_MIN, ANIMAL_Z_MAX\)/);
+  assert.match(guides, /MathUtils\.clamp\(position\.z, ANIMAL_Z_MIN, ANIMAL_Z_MAX\)/);
   assert.match(guides, /DOG_SCALE = 0\.3/);
   assert.match(guides, /CAT_SCALE = 0\.26/);
   assert.doesNotMatch(guides, /<group[^>]+scale=\{0\}/);
@@ -222,8 +222,8 @@ test("welcome-stage animal anchors are visible and bounded", () => {
   assert.match(guides, /\[2\.6, -2\.05, 0\.72\]/);
   assert.match(guides, /<DogGuide/);
   assert.match(guides, /<CatGuide/);
-  assert.match(guides, /_wpResult\.x = MathUtils\.clamp/);
-  assert.match(guides, /_wpResult\.z = MathUtils\.clamp/);
+  assert.match(guides, /position\.x = MathUtils\.clamp/);
+  assert.match(guides, /position\.z = MathUtils\.clamp/);
 });
 
 test("pointer gaze is capped, passive and returns to neutral", () => {

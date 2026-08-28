@@ -141,46 +141,41 @@ export function CompanionController({
   }, [activeSectionId, camera, debugMode]);
 
   useEffect(() => {
-    let measureFrame: number | null = null;
     const measureExclusions = () => {
-      if (measureFrame !== null) return;
-      measureFrame = window.requestAnimationFrame(() => {
-        measureFrame = null;
-        const selectors = [
-          "header",
-          "[role='dialog']",
-          "details[open]",
-          "[data-companion-exclusion]",
-          "a:focus-visible",
-          "button:focus-visible",
-        ].join(",");
-        dynamicExclusions.current = Array.from(
-          document.querySelectorAll<HTMLElement>(selectors),
-        )
-          .map((element, index) => {
-            const rect = element.getBoundingClientRect();
-            return {
-              id: element.getAttribute("data-companion-exclusion") ?? `dom-${index}`,
-              left: MathUtils.clamp((rect.left - 12) / window.innerWidth, 0, 1),
-              top: MathUtils.clamp((rect.top - 12) / window.innerHeight, 0, 1),
-              right: MathUtils.clamp((rect.right + 12) / window.innerWidth, 0, 1),
-              bottom: MathUtils.clamp((rect.bottom + 12) / window.innerHeight, 0, 1),
-              visible:
-                rect.width > 0 &&
-                rect.height > 0 &&
-                rect.bottom > 0 &&
-                rect.top < window.innerHeight,
-            };
-          })
-          .filter(({ visible }) => visible)
-          .map(({ id, left, top, right, bottom }) => ({
-            id,
-            left,
-            top,
-            right,
-            bottom,
-          }));
-      });
+      const selectors = [
+        "header",
+        "[role='dialog']",
+        "details[open]",
+        "[data-companion-exclusion]",
+        "a:focus-visible",
+        "button:focus-visible",
+      ].join(",");
+      dynamicExclusions.current = Array.from(
+        document.querySelectorAll<HTMLElement>(selectors),
+      )
+        .map((element, index) => {
+          const rect = element.getBoundingClientRect();
+          return {
+            id: element.getAttribute("data-companion-exclusion") ?? `dom-${index}`,
+            left: MathUtils.clamp((rect.left - 12) / window.innerWidth, 0, 1),
+            top: MathUtils.clamp((rect.top - 12) / window.innerHeight, 0, 1),
+            right: MathUtils.clamp((rect.right + 12) / window.innerWidth, 0, 1),
+            bottom: MathUtils.clamp((rect.bottom + 12) / window.innerHeight, 0, 1),
+            visible:
+              rect.width > 0 &&
+              rect.height > 0 &&
+              rect.bottom > 0 &&
+              rect.top < window.innerHeight,
+          };
+        })
+        .filter(({ visible }) => visible)
+        .map(({ id, left, top, right, bottom }) => ({
+          id,
+          left,
+          top,
+          right,
+          bottom,
+        }));
     };
     const mutationObserver = new MutationObserver(measureExclusions);
     measureExclusions();
@@ -195,9 +190,8 @@ export function CompanionController({
       mutationObserver.disconnect();
       window.removeEventListener("resize", measureExclusions);
       window.removeEventListener("focusin", measureExclusions);
-      if (measureFrame !== null) window.cancelAnimationFrame(measureFrame);
     };
-  }, []);
+  }, [activeSectionId]);
 
   useEffect(() => {
     const finePointer = window.matchMedia("(pointer: fine)");
@@ -291,8 +285,6 @@ export function CompanionController({
     };
   }, [camera, debugMode, enabled, intersection, ndc, raycaster]);
 
-  const prevState = useRef<CompanionState>("IDLE");
-
   useFrame((_, frameDelta) => {
     const cat = root.current;
     if (!cat || !enabled) return;
@@ -371,14 +363,7 @@ export function CompanionController({
         });
       }
     }
-    if (
-      machine.current.state !== prevState.current ||
-      machine.current.state === "MOVING" ||
-      machine.current.state === "STANDING"
-    ) {
-      invalidate();
-    }
-    prevState.current = machine.current.state;
+    invalidate();
   });
 
   return (
