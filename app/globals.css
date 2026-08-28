@@ -82,3 +82,88 @@ body {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.72));
   backdrop-filter: blur(18px);
 }
+
+/* ── MeteVet Liquid-Glass Utilities ── */
+
+/* Light glass: warm translucent ivory for content over photos */
+.glass-light {
+  background: linear-gradient(135deg, rgba(244, 240, 232, 0.85), rgba(244, 240, 232, 0.65));
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(205, 168, 95, 0.25);
+}
+
+/* Dark glass: deep forest green for dark surfaces */
+.glass-dark {
+  background: linear-gradient(135deg, rgba(18, 58, 48, 0.92), rgba(13, 41, 34, 0.82));
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(205, 168, 95, 0.35);
+}
+
+/* Strong CTA glass: higher contrast for buttons */
+.glass-cta {
+  background: linear-gradient(135deg, rgba(205, 168, 95, 0.95), rgba(189, 151, 84, 0.88));
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+/* Pill/chip glass: subtle for small elements */
+.glass-pill {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.55));
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(13, 41, 34, 0.12);
+}
+
+/* Image caption glass: for photo overlays */
+.glass-caption {
+  background: linear-gradient(135deg, rgba(13, 41, 34, 0.75), rgba(18, 58, 48, 0.65));
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(205, 168, 95, 0.25);
+}
+
+/* Fallback for browsers without backdrop-filter support */
+@supports not (backdrop-filter: blur(1px)) {
+  .glass-light,
+  .glass-dark,
+  .glass-cta,
+  .glass-pill,
+  .glass-caption,
+  .glass-panel {
+    background: rgba(244, 240, 232, 0.92);
+  }
+  .glass-dark {
+    background: rgba(18, 58, 48, 0.92);
+  }
+  .glass-cta {
+    background: rgba(205, 168, 95, 0.95);
+  }
+  .glass-caption {
+    background: rgba(13, 41, 34, 0.88);
+  }
+}
+
+/* Subtle animated underline for footer / utility links */
+.link-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0 1px;
+  transition: background-size 0.3s ease, color 0.2s ease;
+}
+
+.link-underline:hover,
+.link-underline:focus-visible {
+  background-size: 100% 1px;
+}
+
+/* Reduced motion: disable glass / underline transitions */
+@media (prefers-reduced-motion: reduce) {
+  .glass-light,
+  .glass-dark,
+  .glass-cta,
+  .glass-pill,
+  .glass-caption,
+  .glass-panel,
+  .link-underline {
+    transition: none;
+  }
+}

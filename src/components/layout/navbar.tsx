@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Menu, PhoneCall, CalendarDays } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MobileMenu } from "@/src/components/layout/mobile-menu";
 import { LanguageSwitcher } from "@/src/components/shared/language-switcher";
 import { getDictionary } from "@/src/lib/i18n";
@@ -11,10 +11,13 @@ import { usePathname } from "next/navigation";
 import { siteConfig } from "@/src/data/site";
 import type { Locale } from "@/types";
 import { Logo } from "@/src/components/brand/logo";
+import { useReducedMotion } from "@/src/components/motion";
 
 export function Navbar({ locale }: { locale: Locale }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const reduced = useReducedMotion();
   const dict = getDictionary(locale);
 
   const links: Array<{ label: string; route: RouteName }> = [
@@ -27,24 +30,76 @@ export function Navbar({ locale }: { locale: Locale }) {
 
   const isLocalizedHome = pathname === `/${locale}` || pathname === "/";
 
+  useEffect(() => {
+    // Avoid hydration flicker: measure after mount only.
+    const onScroll = () => {
+      setScrolled(window.scrollY > 24);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const headerClass = [
+    "sticky top-0 z-40 border-b",
+    reduced ? "" : "transition-[background-color,backdrop-filter,box-shadow,height,border-color] duration-300 ease-out",
+    scrolled
+      ? "border-[#0D2922]/10 bg-[#F4F0E8]/82 shadow-[0_8px_30px_rgba(13,41,34,0.08)] backdrop-blur-xl"
+      : isLocalizedHome
+        ? "border-transparent bg-transparent backdrop-blur-0"
+        : "border-[#0D2922]/10 bg-[#F4F0E8]/95 backdrop-blur-xl",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <header className="sticky top-0 z-40 border-b border-[#0D2922]/10 bg-[#F4F0E8]/95 backdrop-blur-xl">
-      <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+    <header className={headerClass}>
+      <div
+        className={[
+          "mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8",
+          scrolled ? "h-[60px]" : "h-[68px]",
+          reduced ? "" : "transition-[height] duration-300 ease-out",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
         <Link
           href={getRoutePath("home", locale)}
           aria-label={locale === "tr" ? "MeteVet ana sayfa" : "MeteVet home"}
           className="shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30"
         >
-          <Logo locale={locale} layout="icon-only" markSize={40} className="sm:hidden" />
-          <Logo locale={locale} layout="horizontal" markSize={40} className="hidden sm:inline-flex" descriptorClassName="hidden 2xl:block" />
+          {/* Display lives on the wrappers: Logo's root sets `inline-flex`,
+              which would otherwise win over a `hidden` passed via className
+              and render both marks at once below the sm breakpoint. */}
+          <span className="sm:hidden">
+            <Logo locale={locale} layout="icon-only" markSize={40} />
+          </span>
+          <span className="hidden sm:block">
+            <Logo
+              locale={locale}
+              layout="horizontal"
+              markSize={40}
+              descriptorClassName="hidden 2xl:block"
+            />
+          </span>
         </Link>
 
-        <nav aria-label={locale === "tr" ? "Ana navigasyon" : "Primary navigation"} className="hidden min-w-0 items-center gap-5 text-sm font-medium text-[#0D2922] xl:flex 2xl:gap-7">
+        <nav
+          aria-label={locale === "tr" ? "Ana navigasyon" : "Primary navigation"}
+          className="hidden min-w-0 items-center gap-5 text-sm font-medium text-[#0D2922] xl:flex 2xl:gap-7"
+        >
           {links.map((link) => {
             const href = getRoutePath(link.route, locale);
             const active = pathname === href || (link.route === "home" && isLocalizedHome);
             return (
-              <Link key={link.label} href={href} aria-current={active ? "page" : undefined} className={`whitespace-nowrap rounded-md px-1 py-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30 ${active ? "text-[#123A30]" : "text-[#0D2922]/80 hover:text-[#123A30]"}`}>
+              <Link
+                key={link.label}
+                href={href}
+                aria-current={active ? "page" : undefined}
+                className={`whitespace-nowrap rounded-md px-1 py-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30 ${
+                  active ? "text-[#123A30]" : "text-[#0D2922]/80 hover:text-[#123A30]"
+                }`}
+              >
                 {link.label}
               </Link>
             );
@@ -53,15 +108,27 @@ export function Navbar({ locale }: { locale: Locale }) {
 
         <div className="flex shrink-0 items-center gap-2">
           <LanguageSwitcher />
-          <a href={`tel:${siteConfig.phone.replace(/[^0-9+]/g, "")}`} aria-label={`${dict.common.callNow}: ${siteConfig.phone}`} className="hidden h-10 items-center gap-2 rounded-full border border-[#123A30]/15 bg-white px-3 text-sm font-medium text-[#0D2922] transition hover:border-[#123A30] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30 lg:flex">
+          <a
+            href={`tel:${siteConfig.phone.replace(/[^0-9+]/g, "")}`}
+            aria-label={`${dict.common.callNow}: ${siteConfig.phone}`}
+            className="hidden h-10 items-center gap-2 rounded-full border border-[#123A30]/15 bg-white/90 px-3 text-sm font-medium text-[#0D2922] transition hover:border-[#123A30] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30 lg:flex"
+          >
             <PhoneCall size={16} />
             <span className="hidden 2xl:inline">{dict.common.callNow}</span>
           </a>
-          <Link href={getRoutePath("appointment", locale)} aria-label={dict.common.appointmentCta} className="flex h-10 items-center justify-center gap-2 rounded-full bg-[#123A30] px-3 text-sm font-semibold text-white transition hover:bg-[#0D2922] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30 md:px-4">
+          <Link
+            href={getRoutePath("appointment", locale)}
+            aria-label={dict.common.appointmentCta}
+            className="flex h-10 items-center justify-center gap-2 rounded-full bg-[#123A30] px-3 text-sm font-semibold text-white transition hover:bg-[#0D2922] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30 md:px-4"
+          >
             <CalendarDays size={16} />
             <span className="hidden whitespace-nowrap md:inline">{dict.common.appointmentCta}</span>
           </Link>
-          <button onClick={() => setOpen(true)} className="flex h-10 w-10 items-center justify-center rounded-full border border-[#123A30]/15 bg-white text-[#123A30] transition hover:border-[#123A30] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30 xl:hidden" aria-label={locale === "tr" ? "Menüyü aç" : "Open menu"}>
+          <button
+            onClick={() => setOpen(true)}
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-[#123A30]/15 bg-white/90 text-[#123A30] transition hover:border-[#123A30] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30 xl:hidden"
+            aria-label={locale === "tr" ? "Menüyü aç" : "Open menu"}
+          >
             <Menu size={18} />
           </button>
         </div>

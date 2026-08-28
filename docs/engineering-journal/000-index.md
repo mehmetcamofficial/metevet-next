@@ -37,3 +37,10 @@ Phase-by-phase record of design decisions, migration issues, and resolution rati
 | [046-R](046-phase-4-2-loop-report.md) | 4.2 | Loop Report — 20-section | 2026-07-25 |
 | [047](047-phase-3-2-1-cinematic-hero.md) | 3.2.1 | Cinematic Homepage Scrollytelling — PASS WITH WARNINGS (7/10) | 2026-07-26 |
 | [047-R](047-phase-3-2-1-loop-report.md) | 3.2.1 | Loop Report — 16-section | 2026-07-26 |
+| [048](048-phase-3-2-2-global-motion-design-system.md) | 3.2.2 | Global Motion Design System — PASS WITH WARNINGS | 2026-07-17 |
+| [048-R](048-phase-3-2-2-loop-report.md) | 3.2.2 | Loop Report — review/harden cycles | 2026-07-17 |
+| [050](050-phase-3-2-4-webgl-immersive-experience.md) | 3.2.4 | Real WebGL Immersive Experience — PASS WITH WARNINGS | 2026-07-17 |
+| [050-R](050-phase-3-2-4-loop-report.md) | 3.2.4 | WebGL Loop Report | 2026-07-17 |
+| [051](051-phase-3-2-6-interactive-clinic-journey.md) | 3.2.6 | Interactive Clinic Journey — PASS WITH WARNINGS | 2026-07-17 |
+| [051-R](051-phase-3-2-6-loop-report.md) | 3.2.6 | Interactive Clinic Journey Loop Report | 2026-07-17 |
+| [052](052-phase-3-2-7-cinematic-hero-overhaul.md) | 3.2.7 | Cinematic Hero Overhaul — PASS WITH WARNINGS | 2026-08-12 |
