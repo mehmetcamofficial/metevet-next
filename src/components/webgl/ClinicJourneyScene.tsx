@@ -6,7 +6,9 @@ import { MathUtils, SRGBColorSpace, TextureLoader } from "three";
 import { WEBGL_CONFIG, type WebGLQuality } from "./webgl-config";
 
 export const JOURNEY_STAGES = [
-  { id: "welcome", image: "/images/clinic/clinic-reception.png" },
+  // The cinematic exits on the reception shot. Reusing that composition here
+  // made this separate sticky story look like a leaked final cinematic frame.
+  { id: "welcome", image: "/images/clinic/clinic-waiting.png" },
   { id: "examination", image: "/images/clinic/clinic-exam-room.png" },
   { id: "diagnosis", image: "/images/clinic/clinic-treatment-room.png" },
   { id: "recovery", image: "/images/clinic/clinic-waiting.png" },

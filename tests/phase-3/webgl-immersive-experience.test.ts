@@ -208,7 +208,8 @@ test("journey opens on an interior and exterior is location-only", () => {
   const scene = webgl("ClinicJourneyScene.tsx");
   const stageLines = [...scene.matchAll(/\{ id: "([^"]+)", image: "([^"]+)" \}/g)];
   assert.equal(stageLines[0]?.[1], "welcome");
-  assert.equal(stageLines[0]?.[2], "/images/clinic/clinic-reception.png");
+  assert.equal(stageLines[0]?.[2], "/images/clinic/clinic-waiting.png");
+  assert.doesNotMatch(scene, /clinic-reception\.png/);
   assert.notEqual(stageLines[0]?.[2], "/images/clinic/clinic-exterior.png");
   const exteriorStages = stageLines.filter((match) => match[2].endsWith("clinic-exterior.png"));
   assert.equal(exteriorStages.length, 1);

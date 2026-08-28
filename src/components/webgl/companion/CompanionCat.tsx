@@ -28,9 +28,31 @@ import {
   COMPANION_MODEL_PATH,
 } from "./companion-config";
 import {
-  clampCompanionGaze,
+  clampWorldGaze,
+  createGazeProjectionWorkspace,
+  getGazeDistanceInfluence,
   getCompanionTargetCssHeight,
+  getTouchIdleGaze,
+  projectPointerToWorldTarget,
+  slerpGazeQuaternion,
+  worldTargetToGaze,
 } from "./companion-motion";
+
+function setQuaternionFromGaze(
+  quaternion: Quaternion,
+  euler: Euler,
+  yaw: number,
+  pitch: number,
+  roll = 0,
+) {
+  quaternion.setFromEuler(euler.set(pitch, yaw, roll, "YXZ"));
+}
+
+function gazeRegion(value: number) {
+  if (value < -0.33) return -1;
+  if (value > 0.33) return 1;
+  return 0;
+}
 
 function clipForState(state: CompanionState) {
   if (state === "MOVING") return COMPANION_CLIPS.walk;
@@ -55,6 +77,7 @@ export function CompanionCat({
 }) {
   const { camera, gl, invalidate } = useThree();
   const normalizationRoot = useRef<Group>(null);
+  const orientationRoot = useRef<Group>(null);
   const gltf = useGLTF(COMPANION_MODEL_PATH);
   const clonedScene = useMemo(() => {
     const instance = clone(gltf.scene);
@@ -72,13 +95,54 @@ export function CompanionCat({
   const activeAction = useRef<AnimationAction | null>(null);
   const activeState = useRef<CompanionState | null>(null);
   const head = useRef<Bone | Object3D | null>(null);
-  // Smoothed gaze offset, added on top of whatever pose the mixer produced
-  // this frame. Held across frames so damping converges on the target.
-  const gaze = useRef({ yaw: 0, pitch: 0, tilt: 0 });
+  const neck = useRef<Bone | Object3D | null>(null);
+  const leftEye = useRef<Bone | Object3D | null>(null);
+  const rightEye = useRef<Bone | Object3D | null>(null);
+  const finePointer = useRef(false);
+  const lastDiagnosticRegion = useRef("");
+  const gazeWorkspace = useMemo(() => createGazeProjectionWorkspace(), []);
+  const gazeMath = useMemo(
+    () => ({
+      headPosition: new Vector3(),
+      gazePlanePoint: new Vector3(),
+      cameraDirection: new Vector3(),
+      worldTarget: new Vector3(),
+      orientationQuaternion: new Quaternion(),
+      localDirection: new Vector3(),
+      inverseOrientation: new Quaternion(),
+      euler: new Euler(0, 0, 0, "YXZ"),
+      targets: {
+        neck: new Quaternion(),
+        head: new Quaternion(),
+        leftEye: new Quaternion(),
+        rightEye: new Quaternion(),
+      },
+      offsets: {
+        neck: new Quaternion(),
+        head: new Quaternion(),
+        leftEye: new Quaternion(),
+        rightEye: new Quaternion(),
+      },
+    }),
+    [],
+  );
+
+  useEffect(() => {
+    const query = window.matchMedia("(pointer: fine)");
+    const update = () => {
+      finePointer.current = query.matches;
+    };
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     actionsRef.current = actions;
     head.current = clonedScene.getObjectByName("Head_22") ?? null;
+    neck.current = clonedScene.getObjectByName("Neck_23") ?? null;
+    leftEye.current = clonedScene.getObjectByName("Eye.L_18") ?? null;
+    rightEye.current = clonedScene.getObjectByName("Eye.R_19") ?? null;
     const importedFloor = clonedScene.getObjectByName("Cube_41");
     const previousFloorVisibility = importedFloor?.visible;
     if (importedFloor) importedFloor.visible = false;
@@ -256,7 +320,12 @@ export function CompanionCat({
           }
           console.info("[CompanionCat] render diagnostics", {
             clips: names,
-            headBone: head.current?.name ?? null,
+            gazeBones: {
+              head: head.current?.name ?? null,
+              neck: neck.current?.name ?? null,
+              leftEye: leftEye.current?.name ?? null,
+              rightEye: rightEye.current?.name ?? null,
+            },
             rawBoundingBox: {
               min: rawBox.min.toArray(),
               max: rawBox.max.toArray(),
@@ -443,34 +512,182 @@ export function CompanionCat({
     }
 
     const headBone = head.current;
-    if (!headBone) return;
+    const orientation = orientationRoot.current;
+    if (!headBone || !orientation) return;
     const now = performance.now() / 1000;
     const greeting = now < greetUntilRef.current;
     const pointer = pointerRef.current;
-    const target = clampCompanionGaze(
+    let target = { yaw: 0, pitch: 0 };
+
+    headBone.getWorldPosition(gazeMath.headPosition);
+    orientation.getWorldQuaternion(gazeMath.orientationQuaternion);
+    camera.getWorldDirection(gazeMath.cameraDirection);
+    gazeMath.gazePlanePoint
+      .copy(gazeMath.headPosition)
+      .addScaledVector(
+        gazeMath.cameraDirection,
+        -COMPANION_CONFIG.gazeTargetDistance,
+      );
+    const projected = projectPointerToWorldTarget(
       pointer,
-      COMPANION_CONFIG.headYawRadians,
-      COMPANION_CONFIG.headPitchRadians,
+      camera,
+      gazeMath.gazePlanePoint,
+      gazeMath.worldTarget,
+      gazeWorkspace,
     );
+
+    if (projected) {
+      const worldGaze = worldTargetToGaze(
+        gazeMath.worldTarget,
+        gazeMath.headPosition,
+        gazeMath.orientationQuaternion,
+        gazeMath.localDirection,
+        gazeMath.inverseOrientation,
+      );
+      target = clampWorldGaze(
+        worldGaze,
+        {
+          yaw: COMPANION_CONFIG.gazeYawRadians,
+          pitchUp: COMPANION_CONFIG.gazePitchUpRadians,
+          pitchDown: COMPANION_CONFIG.gazePitchDownRadians,
+        },
+        getGazeDistanceInfluence(worldGaze.distance),
+      );
+    } else if (!finePointer.current) {
+      target = getTouchIdleGaze(now);
+    }
+
     const targetYaw = greeting ? 0 : target.yaw;
     const targetPitch = greeting
-      ? -COMPANION_CONFIG.headPitchRadians * 0.7
+      ? -COMPANION_CONFIG.gazePitchUpRadians * 0.7
       : target.pitch;
     const tilt = greeting
       ? Math.sin((greetUntilRef.current - now) * Math.PI) *
-        COMPANION_CONFIG.headPitchRadians
+        COMPANION_CONFIG.gazePitchUpRadians * 0.45
       : 0;
-    const offset = gaze.current;
-    offset.yaw = MathUtils.damp(offset.yaw, targetYaw, COMPANION_CONFIG.gazeDamping, delta);
-    offset.pitch = MathUtils.damp(offset.pitch, targetPitch, COMPANION_CONFIG.gazeDamping, delta);
-    offset.tilt = MathUtils.damp(offset.tilt, tilt, COMPANION_CONFIG.gazeDamping, delta);
-    headBone.rotation.y += offset.yaw;
-    headBone.rotation.x += offset.pitch;
-    headBone.rotation.z += offset.tilt;
+
+    const neckTarget = clampWorldGaze(
+      {
+        yaw: targetYaw * COMPANION_CONFIG.neckGazeInfluence,
+        pitch: targetPitch * COMPANION_CONFIG.neckGazeInfluence,
+      },
+      {
+        yaw: COMPANION_CONFIG.neckYawRadians,
+        pitchUp: COMPANION_CONFIG.neckPitchUpRadians,
+        pitchDown: COMPANION_CONFIG.neckPitchDownRadians,
+      },
+    );
+    const headTarget = {
+      yaw: targetYaw * COMPANION_CONFIG.headGazeInfluence,
+      pitch: targetPitch * COMPANION_CONFIG.headGazeInfluence,
+    };
+    const eyeTarget = clampWorldGaze(
+      {
+        yaw: targetYaw * COMPANION_CONFIG.eyeGazeInfluence,
+        pitch: targetPitch * COMPANION_CONFIG.eyeGazeInfluence,
+      },
+      {
+        yaw: COMPANION_CONFIG.eyeYawRadians,
+        pitchUp: COMPANION_CONFIG.eyePitchRadians,
+        pitchDown: COMPANION_CONFIG.eyePitchRadians,
+      },
+    );
+
+    setQuaternionFromGaze(
+      gazeMath.targets.neck,
+      gazeMath.euler,
+      neckTarget.yaw,
+      neckTarget.pitch,
+    );
+    setQuaternionFromGaze(
+      gazeMath.targets.head,
+      gazeMath.euler,
+      headTarget.yaw,
+      headTarget.pitch,
+      tilt,
+    );
+    setQuaternionFromGaze(
+      gazeMath.targets.leftEye,
+      gazeMath.euler,
+      eyeTarget.yaw,
+      eyeTarget.pitch,
+    );
+    gazeMath.targets.rightEye.copy(gazeMath.targets.leftEye);
+
+    const returning = !pointer.active && finePointer.current;
+    const headDamping = returning
+      ? COMPANION_CONFIG.neutralGazeDamping
+      : COMPANION_CONFIG.headGazeDamping;
+    const neckDamping = returning
+      ? COMPANION_CONFIG.neutralGazeDamping
+      : COMPANION_CONFIG.neckGazeDamping;
+    const eyeDamping = returning
+      ? COMPANION_CONFIG.neutralGazeDamping * 1.4
+      : COMPANION_CONFIG.eyeGazeDamping;
+
+    slerpGazeQuaternion(
+      gazeMath.offsets.neck,
+      gazeMath.targets.neck,
+      neckDamping,
+      delta,
+    );
+    slerpGazeQuaternion(
+      gazeMath.offsets.head,
+      gazeMath.targets.head,
+      headDamping,
+      delta,
+    );
+    slerpGazeQuaternion(
+      gazeMath.offsets.leftEye,
+      gazeMath.targets.leftEye,
+      eyeDamping,
+      delta,
+    );
+    slerpGazeQuaternion(
+      gazeMath.offsets.rightEye,
+      gazeMath.targets.rightEye,
+      eyeDamping,
+      delta,
+    );
+
+    neck.current?.quaternion.multiply(gazeMath.offsets.neck);
+    headBone.quaternion.multiply(gazeMath.offsets.head);
+    leftEye.current?.quaternion.multiply(gazeMath.offsets.leftEye);
+    rightEye.current?.quaternion.multiply(gazeMath.offsets.rightEye);
+
+    if (process.env.NODE_ENV === "development" && projected) {
+      const region = `${gazeRegion(pointer.x)},${gazeRegion(pointer.y)}`;
+      if (region !== lastDiagnosticRegion.current) {
+        lastDiagnosticRegion.current = region;
+        console.info("[CompanionCat] gaze sample", {
+          region,
+          pointer: { x: pointer.x, y: pointer.y },
+          worldTarget: gazeMath.worldTarget.toArray(),
+          targetDegrees: {
+            yaw: MathUtils.radToDeg(targetYaw),
+            pitch: MathUtils.radToDeg(targetPitch),
+          },
+          boneDegrees: {
+            headYaw: MathUtils.radToDeg(headTarget.yaw),
+            headPitch: MathUtils.radToDeg(headTarget.pitch),
+            neckYaw: MathUtils.radToDeg(neckTarget.yaw),
+            neckPitch: MathUtils.radToDeg(neckTarget.pitch),
+            eyeYaw: MathUtils.radToDeg(eyeTarget.yaw),
+            eyePitch: MathUtils.radToDeg(eyeTarget.pitch),
+          },
+          bones: {
+            head: head.current?.name ?? null,
+            neck: neck.current?.name ?? null,
+            leftEye: leftEye.current?.name ?? null,
+            rightEye: rightEye.current?.name ?? null,
+          },
+        });
+      }
+    }
   });
 
   return (
-    <group name="CompanionOrientation" rotation={[0, Math.PI, 0]}>
+    <group ref={orientationRoot} name="CompanionOrientation" rotation={[0, Math.PI, 0]}>
       <group ref={normalizationRoot} name="CompanionNormalization">
         <primitive object={clonedScene} dispose={null} />
       </group>

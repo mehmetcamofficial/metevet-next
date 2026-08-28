@@ -447,8 +447,10 @@ test("65. story copy is centred by flex so inline transforms do not fight it", (
 
 test("66. the hero hands over to the page instead of cutting", () => {
   assert.match(CONSTANTS, /HANDOFF_START/);
-  assert.match(HERO, /sticky\.style\.opacity/);
-  assert.match(HERO, /sticky\.style\.transform = `scale\(/);
+  assert.match(HERO, /visual\.style\.opacity/);
+  assert.match(HERO, /visual\.style\.transform = `scale\(/);
+  assert.match(HERO, /className="sticky top-0/);
+  assert.doesNotMatch(HERO, /style\.position\s*=|stickyRef/);
 });
 
 test("67. an exit cue appears near the end", () => {

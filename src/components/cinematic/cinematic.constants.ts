@@ -140,9 +140,18 @@ export function getCinematicFrameWindow(index: number, tier: CinematicTier): num
   return [...frames].sort((a, b) => a - b);
 }
 
-/** Sticky ownership ends at the final cinematic progress boundary. */
+export type CinematicLifecycle = "active" | "released";
+
+/**
+ * Diagnostic lifecycle state. Layout release itself is owned by CSS sticky
+ * containment, so this value never toggles positioning or visibility.
+ */
+export function getCinematicLifecycle(progress: number): CinematicLifecycle {
+  return progress >= 1 ? "released" : "active";
+}
+
 export function isCinematicReleased(progress: number): boolean {
-  return progress >= 0.999;
+  return getCinematicLifecycle(progress) === "released";
 }
 
 // ── Rendering ──
