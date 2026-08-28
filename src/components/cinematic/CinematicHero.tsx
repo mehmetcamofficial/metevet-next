@@ -9,7 +9,7 @@ import {
   HANDOFF_START,
   TIER_SCROLL_VH,
   frameUrl,
-  isCinematicReleased,
+  getCinematicLifecycle,
   progressToFrame,
 } from "./cinematic.constants";
 import { CinematicCanvas } from "./CinematicCanvas";
@@ -30,7 +30,7 @@ export function CinematicHero({ locale }: { locale: Locale }) {
   const effectiveTier = tier ?? "static";
 
   const sectionRef = useRef<HTMLElement>(null);
-  const stickyRef = useRef<HTMLDivElement>(null);
+  const visualRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<CinematicOverlayHandle>(null);
   const overlayBoxRef = useRef<HTMLDivElement>(null);
   const scrollHintRef = useRef<HTMLDivElement>(null);
@@ -38,8 +38,6 @@ export function CinematicHero({ locale }: { locale: Locale }) {
   const targetFrameRef = useRef(0);
 
   const [inView, setInView] = useState(true);
-  const [released, setReleased] = useState(false);
-  const releasedRef = useRef(false);
 
   const { ready, failed, getDrawableFrame, maintainDecodeWindow } =
     useCinematicFrames(effectiveTier);
@@ -47,11 +45,6 @@ export function CinematicHero({ locale }: { locale: Locale }) {
   const pointerRef = usePointerDepth(!isStatic && ready && !failed, overlayBoxRef);
 
   const handleProgress = useCallback((progress: number) => {
-    const shouldRelease = isCinematicReleased(progress);
-    if (releasedRef.current !== shouldRelease) {
-      releasedRef.current = shouldRelease;
-      setReleased(shouldRelease);
-    }
     targetFrameRef.current = progressToFrame(progress);
     overlayRef.current?.update(progress);
 
@@ -59,6 +52,9 @@ export function CinematicHero({ locale }: { locale: Locale }) {
     // pins, the sticky box hangs below the fold by exactly that much. Lift
     // the bottom cues by the overshoot so they are never clipped.
     const section = sectionRef.current;
+    if (section) {
+      section.dataset.cinematicLifecycle = getCinematicLifecycle(progress);
+    }
     const overshoot = section ? Math.max(0, section.getBoundingClientRect().top) : 0;
 
     const hint = scrollHintRef.current;
@@ -78,12 +74,11 @@ export function CinematicHero({ locale }: { locale: Locale }) {
     }
 
     // Hand the screen over to the page below instead of cutting to it.
-    const sticky = stickyRef.current;
-    if (sticky) {
+    const visual = visualRef.current;
+    if (visual) {
       const handoff = Math.max(0, (progress - HANDOFF_START) / (1 - HANDOFF_START));
-      sticky.style.opacity = shouldRelease ? "0" : String(1 - handoff * 0.9);
-      sticky.style.transform = `scale(${1 - handoff * 0.05})`;
-      sticky.style.pointerEvents = shouldRelease ? "none" : "";
+      visual.style.opacity = String(1 - handoff * 0.9);
+      visual.style.transform = `scale(${1 - handoff * 0.05})`;
     }
   }, []);
 
@@ -115,53 +110,58 @@ export function CinematicHero({ locale }: { locale: Locale }) {
   return (
     <section
       ref={sectionRef}
-      data-cinematic-state={released ? "released" : "active"}
+      data-cinematic-lifecycle="active"
       className="relative"
       style={{ height: `${scrollVh}vh` }}
       aria-label={dict.home.hero.eyebrow}
     >
       <div
-        ref={stickyRef}
-        className={`${released ? "absolute inset-x-0 bottom-0" : "sticky top-0"} h-[100svh] h-[100dvh] w-full overflow-hidden bg-[#0D2922] will-change-[opacity,transform]`}
+        data-cinematic-viewport
+        className="sticky top-0 h-[100svh] h-[100dvh] w-full overflow-hidden"
       >
-        {showCanvas ? (
-          <CinematicCanvas
-            targetFrameRef={targetFrameRef}
-            pointerRef={pointerRef}
-            active={inView && !released}
-            getDrawableFrame={getDrawableFrame}
-            maintainDecodeWindow={maintainDecodeWindow}
-          />
-        ) : (
-          <NextImage
-            src={frameUrl(0)}
-            alt=""
-            aria-hidden="true"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
-        )}
+        <div
+          ref={visualRef}
+          data-cinematic-visual
+          className="relative h-full w-full overflow-hidden bg-[#0D2922] will-change-[opacity,transform]"
+        >
+          {showCanvas ? (
+            <CinematicCanvas
+              targetFrameRef={targetFrameRef}
+              pointerRef={pointerRef}
+              active={inView}
+              getDrawableFrame={getDrawableFrame}
+              maintainDecodeWindow={maintainDecodeWindow}
+            />
+          ) : (
+            <NextImage
+              src={frameUrl(0)}
+              alt=""
+              aria-hidden="true"
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover"
+            />
+          )}
 
         {/* Legibility scrim. The plate is bright daylight photography, so the
             copy needs a real key behind it: a vertical wash that anchors the
             navbar and the lower edge, plus a soft centre pool under the text. */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,26,20,0.62)_0%,rgba(6,26,20,0.24)_26%,rgba(6,26,20,0.34)_60%,rgba(6,26,20,0.86)_100%)]"
-        />
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-[radial-gradient(72%_58%_at_50%_47%,rgba(6,26,20,0.58)_0%,rgba(6,26,20,0.32)_46%,rgba(6,26,20,0)_78%)]"
-        />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,26,20,0.62)_0%,rgba(6,26,20,0.24)_26%,rgba(6,26,20,0.34)_60%,rgba(6,26,20,0.86)_100%)]"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-[radial-gradient(72%_58%_at_50%_47%,rgba(6,26,20,0.58)_0%,rgba(6,26,20,0.32)_46%,rgba(6,26,20,0)_78%)]"
+          />
 
-        <div ref={overlayBoxRef} className="absolute inset-0">
-          <CinematicOverlay ref={overlayRef} locale={locale} animated={!isStatic} />
-        </div>
+          <div ref={overlayBoxRef} className="absolute inset-0">
+            <CinematicOverlay ref={overlayRef} locale={locale} animated={!isStatic} />
+          </div>
 
-        {!isStatic ? (
-          <>
+          {!isStatic ? (
+            <>
             <div
               ref={scrollHintRef}
               style={{ transform: "translate(-50%, 0)" }}
@@ -204,8 +204,9 @@ export function CinematicHero({ locale }: { locale: Locale }) {
             >
               {copy.skip}
             </button>
-          </>
-        ) : null}
+            </>
+          ) : null}
+        </div>
       </div>
     </section>
   );
