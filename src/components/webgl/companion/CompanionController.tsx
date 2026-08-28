@@ -23,6 +23,7 @@ import {
   COMPANION_MODEL_PATH,
   COMPANION_SCREEN_ANCHORS,
 } from "./companion-config";
+import { normalizeCompanionPointer } from "./companion-motion";
 
 type ViewportExclusion = {
   id: string;
@@ -201,9 +202,12 @@ export function CompanionController({
         !finePointer.matches ||
         event.pointerType !== "mouse"
       ) return;
-      pointerRef.current.x = (event.clientX / window.innerWidth) * 2 - 1;
-      pointerRef.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
-      pointerRef.current.active = true;
+      pointerRef.current = normalizeCompanionPointer(
+        event.clientX,
+        event.clientY,
+        window.innerWidth,
+        window.innerHeight,
+      );
       pendingPointer.current = { x: event.clientX, y: event.clientY };
       lastInteraction.current = performance.now() / 1000;
       if (settleTimer.current) clearTimeout(settleTimer.current);

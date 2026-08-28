@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import type { CinematicTier } from "./cinematic.constants";
+import { selectCinematicTier } from "./cinematic-tier";
 
 type NetworkInformation = {
   saveData?: boolean;
@@ -14,23 +15,15 @@ type CapabilityNavigator = Navigator & {
 };
 
 function detectTier(): CinematicTier {
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return "static";
-
   const nav = navigator as CapabilityNavigator;
-  if (nav.connection?.saveData) return "static";
-
-  const effectiveType = nav.connection?.effectiveType;
-  if (effectiveType === "slow-2g" || effectiveType === "2g") return "static";
-  if (effectiveType === "3g") return "lite";
-
-  const memory = nav.deviceMemory;
-  if (typeof memory === "number" && memory <= 4) return "lite";
-  if (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) return "lite";
-
-  const width = window.innerWidth;
-  if (width < 768) return "lite";
-  if (width < 1024) return "reduced";
-  return "full";
+  return selectCinematicTier({
+    reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    saveData: nav.connection?.saveData === true,
+    effectiveType: nav.connection?.effectiveType,
+    deviceMemory: nav.deviceMemory,
+    hardwareConcurrency: navigator.hardwareConcurrency,
+    viewportWidth: window.innerWidth,
+  });
 }
 
 function subscribe(onChange: () => void): () => void {

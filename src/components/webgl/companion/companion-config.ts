@@ -11,7 +11,7 @@ export const COMPANION_CLIPS = {
 } as const;
 
 export const COMPANION_CONFIG = {
-  pointerSettleMs: 350,
+  pointerSettleMs: 120,
   destinationDeadZone: 0.4,
   pointerOffset: 0.45,
   walkSpeed: 1.15,
@@ -22,11 +22,12 @@ export const COMPANION_CONFIG = {
   crossfadeSeconds: 0.22,
   idleReturnSeconds: 10,
   greetSeconds: 1.5,
-  headYawRadians: (8 * Math.PI) / 180,
-  headPitchRadians: (5 * Math.PI) / 180,
+  headYawRadians: (12 * Math.PI) / 180,
+  headPitchRadians: (7 * Math.PI) / 180,
+  gazeDamping: 8,
   orthographicHalfHeight: 3,
-  targetCssHeight: 126,
-  compactTargetCssHeight: 100,
+  targetCssHeight: 112,
+  compactTargetCssHeight: 88,
   minimumNormalizedScale: 0.05,
   maximumNormalizedScale: 0.5,
   navigationNdc: { minX: -0.82, maxX: 0.82, minY: -0.78, maxY: -0.32 },

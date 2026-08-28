@@ -76,7 +76,8 @@ test("11. loaded and decoded frames are tracked separately", () => {
 
 test("12. loading uses a bounded worker pool", () => {
   assert.match(FRAMES, /PRELOAD_CONCURRENCY/);
-  assert.match(FRAMES, /runPool/);
+  assert.match(FRAMES, /inFlight < PRELOAD_CONCURRENCY/);
+  assert.match(FRAMES, /pump/);
 });
 
 test("13. the hero reveals on the first frame, never on the full sequence", () => {
@@ -86,10 +87,10 @@ test("13. the hero reveals on the first frame, never on the full sequence", () =
   assert.doesNotMatch(FRAMES, /settledCount\s*===\s*TOTAL_FRAMES/);
 });
 
-test("14. loading is prioritised: first frame, then ladder, then remainder", () => {
+test("14. loading is prioritised: first frame, then ladder, then playhead windows", () => {
   assert.match(FRAMES, /buildPriorityLadder/);
   assert.match(FRAMES, /setScrubReady\(true\)/);
-  assert.match(FRAMES, /runPool\(remainder\)/);
+  assert.match(FRAMES, /getCinematicFrameWindow/);
 });
 
 test("15. the priority ladder covers every segment boundary", () => {
@@ -97,10 +98,13 @@ test("15. the priority ladder covers every segment boundary", () => {
   assert.match(CONSTANTS, /ladder\.add\(segment\.to\)/);
 });
 
-test("16. decoding is windowed around the playhead to bound memory", () => {
-  // Decoding all 179 frames at 1600x894 would pin ~1 GB of RGBA surfaces.
-  assert.match(FRAMES, /DECODE_AHEAD/);
-  assert.match(FRAMES, /DECODE_BEHIND/);
+test("16. decoding is windowed around the playhead to bound memory", async () => {
+  const { getCinematicFrameWindow, TIER_FRAME_CACHE_LIMIT } = await import(
+    "../../src/components/cinematic/cinematic.constants.ts"
+  );
+  const window = getCinematicFrameWindow(90, "full");
+  assert.ok(window.includes(90));
+  assert.ok(window.length < TIER_FRAME_CACHE_LIMIT.full);
   assert.match(FRAMES, /maintainDecodeWindow/);
 });
 
@@ -479,8 +483,11 @@ test("72. interactive controls expose visible focus states", () => {
   assert.match(OVERLAY, /focus-visible:ring/);
 });
 
-test("73. reduced motion yields the static tier and a complete page", () => {
-  assert.match(TIER, /prefers-reduced-motion: reduce\)"\)\.matches\) return "static"/);
+test("73. reduced motion yields the static tier and a complete page", async () => {
+  const { selectCinematicTier } = await import(
+    "../../src/components/cinematic/cinematic-tier.ts"
+  );
+  assert.equal(selectCinematicTier({ reducedMotion: true, saveData: false, viewportWidth: 1440 }), "static");
   assert.match(HERO, /isStatic = tier === null \|\| tier === "static"/);
   assert.match(HERO, /animated=\{!isStatic\}/);
 });

@@ -41,7 +41,7 @@ export function Navbar({ locale }: { locale: Locale }) {
   }, []);
 
   const headerClass = [
-    "sticky top-0 z-40 border-b",
+    "sticky top-0 z-40 border-b pt-[env(safe-area-inset-top)]",
     reduced ? "" : "transition-[background-color,backdrop-filter,box-shadow,height,border-color] duration-300 ease-out",
     scrolled
       ? "border-[#0D2922]/10 bg-[#F4F0E8]/82 shadow-[0_8px_30px_rgba(13,41,34,0.08)] backdrop-blur-xl"
@@ -66,13 +66,13 @@ export function Navbar({ locale }: { locale: Locale }) {
         <Link
           href={getRoutePath("home", locale)}
           aria-label={locale === "tr" ? "MeteVet ana sayfa" : "MeteVet home"}
-          className="shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30"
+          className="flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30"
         >
           {/* Display lives on the wrappers: Logo's root sets `inline-flex`,
               which would otherwise win over a `hidden` passed via className
               and render both marks at once below the sm breakpoint. */}
           <span className="sm:hidden">
-            <Logo locale={locale} layout="icon-only" markSize={40} />
+            <Logo locale={locale} layout="icon-only" markSize={36} />
           </span>
           <span className="hidden sm:block">
             <Logo
@@ -111,7 +111,7 @@ export function Navbar({ locale }: { locale: Locale }) {
           <a
             href={`tel:${siteConfig.phone.replace(/[^0-9+]/g, "")}`}
             aria-label={`${dict.common.callNow}: ${siteConfig.phone}`}
-            className="hidden h-10 items-center gap-2 rounded-full border border-[#123A30]/15 bg-white/90 px-3 text-sm font-medium text-[#0D2922] transition hover:border-[#123A30] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30 lg:flex"
+            className="hidden h-11 items-center gap-2 rounded-full border border-[#123A30]/15 bg-white/90 px-3 text-sm font-medium text-[#0D2922] transition hover:border-[#123A30] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30 lg:flex"
           >
             <PhoneCall size={16} />
             <span className="hidden 2xl:inline">{dict.common.callNow}</span>
@@ -119,14 +119,14 @@ export function Navbar({ locale }: { locale: Locale }) {
           <Link
             href={getRoutePath("appointment", locale)}
             aria-label={dict.common.appointmentCta}
-            className="flex h-10 items-center justify-center gap-2 rounded-full bg-[#123A30] px-3 text-sm font-semibold text-white transition hover:bg-[#0D2922] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30 md:px-4"
+            className="flex h-11 min-w-11 items-center justify-center gap-2 rounded-full bg-[#123A30] px-3 text-sm font-semibold text-white transition hover:bg-[#0D2922] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30 md:px-4"
           >
             <CalendarDays size={16} />
             <span className="hidden whitespace-nowrap md:inline">{dict.common.appointmentCta}</span>
           </Link>
           <button
             onClick={() => setOpen(true)}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-[#123A30]/15 bg-white/90 text-[#123A30] transition hover:border-[#123A30] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30 xl:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-[#123A30]/15 bg-white/90 text-[#123A30] transition hover:border-[#123A30] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30 xl:hidden"
             aria-label={locale === "tr" ? "Menüyü aç" : "Open menu"}
           >
             <Menu size={18} />

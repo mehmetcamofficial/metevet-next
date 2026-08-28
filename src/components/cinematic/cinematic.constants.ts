@@ -101,6 +101,50 @@ export const TIER_SCROLL_VH: Record<CinematicTier, number> = {
 
 export const PRELOAD_CONCURRENCY = 6;
 
+/**
+ * Upper bound for retained HTMLImageElements. Decoding is windowed too, but
+ * retaining every fetched image can still leave browsers holding decoded
+ * surfaces. These limits keep the scrolling experience smooth without making
+ * the sequence an all-at-once memory allocation.
+ */
+export const TIER_FRAME_CACHE_LIMIT: Record<CinematicTier, number> = {
+  full: 52,
+  reduced: 40,
+  lite: 28,
+  static: 1,
+};
+
+export const FRAME_WINDOW = { behind: 10, ahead: 16 } as const;
+
+/** Pure, testable window used for both frame prefetching and eviction. */
+export function getCinematicFrameWindow(index: number, tier: CinematicTier): number[] {
+  const stride = TIER_STRIDE[tier];
+  if (stride <= 0) return [0];
+
+  const centre = Math.max(0, Math.min(LAST_USABLE_FRAME, Math.round(index)));
+  const frames = new Set<number>();
+  for (let frame = centre - FRAME_WINDOW.behind; frame <= centre + FRAME_WINDOW.ahead; frame++) {
+    if (frame < 0 || frame > LAST_USABLE_FRAME) continue;
+    if (frame % stride === 0) frames.add(frame);
+  }
+  frames.add(0);
+  frames.add(LAST_USABLE_FRAME);
+  for (const segment of CINEMATIC_SEGMENTS) {
+    if (segment.from >= centre - FRAME_WINDOW.behind && segment.from <= centre + FRAME_WINDOW.ahead) {
+      frames.add(segment.from);
+    }
+    if (segment.to >= centre - FRAME_WINDOW.behind && segment.to <= centre + FRAME_WINDOW.ahead) {
+      frames.add(segment.to);
+    }
+  }
+  return [...frames].sort((a, b) => a - b);
+}
+
+/** Sticky ownership ends at the final cinematic progress boundary. */
+export function isCinematicReleased(progress: number): boolean {
+  return progress >= 0.999;
+}
+
 // ── Rendering ──
 
 export const ZOOM_FACTOR = 1.18;

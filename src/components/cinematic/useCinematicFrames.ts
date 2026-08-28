@@ -6,23 +6,21 @@ import {
   FRAME_SEARCH_RADIUS,
   LAST_USABLE_FRAME,
   PRELOAD_CONCURRENCY,
+  TIER_FRAME_CACHE_LIMIT,
   TIER_STRIDE,
   buildPriorityLadder,
   frameUrl,
+  getCinematicFrameWindow,
   type CinematicTier,
 } from "./cinematic.constants";
 
 /**
  * Frames decoded either side of the playhead.
  *
- * Every planned frame is fetched, but only this window is explicitly decoded.
- * Decoding all 179 frames at 1600x894 would pin roughly a gigabyte of RGBA
- * surfaces; a window keeps it to a couple of hundred megabytes while still
- * guaranteeing the frames about to be scrubbed through are jank-free.
+ * Frames are fetched and decoded in a bounded playhead window. Decoding all
+ * 179 frames at 1600x894 would pin roughly a gigabyte of RGBA surfaces; the
+ * cache keeps only the frames most likely to be shown next.
  */
-const DECODE_AHEAD = 16;
-const DECODE_BEHIND = 10;
-
 export type CinematicFrames = {
   /** First frame is painted — the hero can be shown. */
   ready: boolean;
@@ -59,6 +57,8 @@ export function useCinematicFrames(tier: CinematicTier): CinematicFrames {
   const loadedRef = useRef<Set<number>>(new Set());
   const decodedRef = useRef<Set<number>>(new Set());
   const plannedRef = useRef<number[]>([]);
+  const touchedRef = useRef<Map<number, number>>(new Map());
+  const requestFramesRef = useRef<(indices: readonly number[]) => void>(() => {});
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -66,11 +66,16 @@ export function useCinematicFrames(tier: CinematicTier): CinematicFrames {
     const images = imagesRef.current;
     const loaded = loadedRef.current;
     const decoded = decodedRef.current;
+    const touched = touchedRef.current;
     const planned = planFrames(tier);
     plannedRef.current = planned;
+    const plannedSet = new Set(planned);
 
     let cancelled = false;
     let failures = 0;
+    let queue: number[] = [];
+    let inFlight = 0;
+    const queued = new Set<number>();
 
     const load = (index: number) =>
       new Promise<void>((resolve) => {
@@ -97,23 +102,28 @@ export function useCinematicFrames(tier: CinematicTier): CinematicFrames {
         };
       });
 
-    const runPool = async (indices: number[]) => {
-      let cursor = 0;
-      const workers = Array.from(
-        { length: Math.min(PRELOAD_CONCURRENCY, indices.length) },
-        async () => {
-          while (!cancelled && cursor < indices.length) {
-            await load(indices[cursor++]);
-          }
-        },
-      );
-      await Promise.all(workers);
+    const pump = () => {
+      while (!cancelled && inFlight < PRELOAD_CONCURRENCY && queue.length > 0) {
+        const index = queue.shift();
+        if (index === undefined) continue;
+        queued.delete(index);
+        inFlight += 1;
+        void load(index).finally(() => {
+          inFlight -= 1;
+          pump();
+        });
+      }
     };
 
-    const plannedSet = new Set(planned);
-    const ladder = buildPriorityLadder().filter((i) => plannedSet.has(i));
-    const ladderSet = new Set(ladder);
-    const remainder = planned.filter((i) => !ladderSet.has(i));
+    const requestFrames = (indices: readonly number[]) => {
+      for (const index of indices) {
+        if (!plannedSet.has(index) || images.has(index) || queued.has(index)) continue;
+        queued.add(index);
+        queue.push(index);
+      }
+      pump();
+    };
+    requestFramesRef.current = requestFrames;
 
     void (async () => {
       await load(0);
@@ -123,13 +133,14 @@ export function useCinematicFrames(tier: CinematicTier): CinematicFrames {
       if (first?.decode) await first.decode().catch(() => {});
       if (cancelled) return;
       decoded.add(0);
+      touched.set(0, performance.now());
       setReady(true);
 
-      await runPool(ladder.filter((i) => i !== 0));
-      if (cancelled) return;
+      // Fetch only a small opening window plus a sparse navigation ladder.
+      // Later frames are scheduled as the playhead approaches them.
+      const ladder = buildPriorityLadder().filter((index) => plannedSet.has(index));
+      requestFrames([...getCinematicFrameWindow(0, tier), ...ladder]);
       setScrubReady(true);
-
-      await runPool(remainder);
     })();
 
     return () => {
@@ -142,6 +153,10 @@ export function useCinematicFrames(tier: CinematicTier): CinematicFrames {
       images.clear();
       loaded.clear();
       decoded.clear();
+      touched.clear();
+      queue = [];
+      queued.clear();
+      requestFramesRef.current = () => {};
     };
   }, [tier]);
 
@@ -150,13 +165,22 @@ export function useCinematicFrames(tier: CinematicTier): CinematicFrames {
     const loaded = loadedRef.current;
     const target = Math.max(0, Math.min(LAST_USABLE_FRAME, Math.round(index)));
 
-    if (loaded.has(target)) return images.get(target) ?? null;
+    if (loaded.has(target)) {
+      touchedRef.current.set(target, performance.now());
+      return images.get(target) ?? null;
+    }
 
     for (let radius = 1; radius <= FRAME_SEARCH_RADIUS; radius++) {
       const lower = target - radius;
       const upper = target + radius;
-      if (lower >= 0 && loaded.has(lower)) return images.get(lower) ?? null;
-      if (upper <= LAST_USABLE_FRAME && loaded.has(upper)) return images.get(upper) ?? null;
+      if (lower >= 0 && loaded.has(lower)) {
+        touchedRef.current.set(lower, performance.now());
+        return images.get(lower) ?? null;
+      }
+      if (upper <= LAST_USABLE_FRAME && loaded.has(upper)) {
+        touchedRef.current.set(upper, performance.now());
+        return images.get(upper) ?? null;
+      }
     }
 
     // Never return null once anything has loaded — a blank canvas is worse
@@ -171,6 +195,7 @@ export function useCinematicFrames(tier: CinematicTier): CinematicFrames {
         best = index;
       }
     }
+    if (best !== null) touchedRef.current.set(best, performance.now());
     return best === null ? null : (images.get(best) ?? null);
   }, []);
 
@@ -178,10 +203,11 @@ export function useCinematicFrames(tier: CinematicTier): CinematicFrames {
     const images = imagesRef.current;
     const loaded = loadedRef.current;
     const decoded = decodedRef.current;
-    const centre = Math.round(index);
+    const windowFrames = getCinematicFrameWindow(index, tier);
+    const protectedFrames = new Set(windowFrames);
+    requestFramesRef.current(windowFrames);
 
-    for (let i = centre - DECODE_BEHIND; i <= centre + DECODE_AHEAD; i++) {
-      if (i < 0 || i > LAST_USABLE_FRAME) continue;
+    for (const i of windowFrames) {
       if (decoded.has(i) || !loaded.has(i)) continue;
       const img = images.get(i);
       if (!img?.decode) continue;
@@ -190,7 +216,23 @@ export function useCinematicFrames(tier: CinematicTier): CinematicFrames {
         decoded.delete(i);
       });
     }
-  }, []);
+    const candidates = [...images.keys()]
+      .filter((frame) => loaded.has(frame) && !protectedFrames.has(frame))
+      .sort((left, right) => (touchedRef.current.get(left) ?? 0) - (touchedRef.current.get(right) ?? 0));
+    while (images.size > TIER_FRAME_CACHE_LIMIT[tier] && candidates.length > 0) {
+      const frame = candidates.shift();
+      if (frame === undefined) break;
+      const image = images.get(frame);
+      if (!image) continue;
+      image.onload = null;
+      image.onerror = null;
+      image.src = "";
+      images.delete(frame);
+      loaded.delete(frame);
+      decoded.delete(frame);
+      touchedRef.current.delete(frame);
+    }
+  }, [tier]);
 
   return { ready, scrubReady, failed, getDrawableFrame, maintainDecodeWindow };
 }

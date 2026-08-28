@@ -66,7 +66,7 @@ test("one-shots, loops and crossfades use the verified actions", () => {
 test("pointer destination settles, raycasts, offsets and clamps", () => {
   assert.match(controller, /pointer: fine/);
   assert.match(controller, /setTimeout/);
-  assert.match(config, /pointerSettleMs:\s*350/);
+  assert.match(config, /pointerSettleMs:\s*120/);
   assert.match(config, /destinationDeadZone:\s*0\.4/);
   assert.match(config, /pointerOffset:\s*0\.45/);
   assert.match(controller, /raycaster\.setFromCamera/);
@@ -120,8 +120,8 @@ test("one live cat replaces both procedural guides", () => {
 
 test("head greeting uses only the verified head and semantic control", () => {
   assert.match(cat, /getObjectByName\("Head_22"\)/);
-  assert.match(config, /headYawRadians:\s*\(8 \* Math\.PI\)/);
-  assert.match(config, /headPitchRadians:\s*\(5 \* Math\.PI\)/);
+  assert.match(config, /headYawRadians:\s*\(12 \* Math\.PI\)/);
+  assert.match(config, /headPitchRadians:\s*\(7 \* Math\.PI\)/);
   assert.match(homepageLayer, /<button/);
   assert.match(homepageLayer, /Kediye merhaba de/);
   assert.match(homepageLayer, /Greet the cat/);
@@ -184,7 +184,7 @@ test("greet readiness requires valid projected model geometry", () => {
   assert.match(homepageLayer, /modelChecked && !modelVisibleReady/);
   assert.match(homepageLayer, /safe-area-inset-bottom/);
   assert.match(homepageLayer, /safe-area-inset-left/);
-  assert.match(homepageLayer, /pointer-events-auto rounded-full/);
+  assert.match(homepageLayer, /pointer-events-auto[\s\S]*rounded-full/);
 });
 
 test("development diagnostics and marker expose render visibility", () => {

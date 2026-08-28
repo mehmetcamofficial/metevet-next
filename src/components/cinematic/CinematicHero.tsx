@@ -9,6 +9,7 @@ import {
   HANDOFF_START,
   TIER_SCROLL_VH,
   frameUrl,
+  isCinematicReleased,
   progressToFrame,
 } from "./cinematic.constants";
 import { CinematicCanvas } from "./CinematicCanvas";
@@ -37,6 +38,8 @@ export function CinematicHero({ locale }: { locale: Locale }) {
   const targetFrameRef = useRef(0);
 
   const [inView, setInView] = useState(true);
+  const [released, setReleased] = useState(false);
+  const releasedRef = useRef(false);
 
   const { ready, failed, getDrawableFrame, maintainDecodeWindow } =
     useCinematicFrames(effectiveTier);
@@ -44,6 +47,11 @@ export function CinematicHero({ locale }: { locale: Locale }) {
   const pointerRef = usePointerDepth(!isStatic && ready && !failed, overlayBoxRef);
 
   const handleProgress = useCallback((progress: number) => {
+    const shouldRelease = isCinematicReleased(progress);
+    if (releasedRef.current !== shouldRelease) {
+      releasedRef.current = shouldRelease;
+      setReleased(shouldRelease);
+    }
     targetFrameRef.current = progressToFrame(progress);
     overlayRef.current?.update(progress);
 
@@ -73,8 +81,9 @@ export function CinematicHero({ locale }: { locale: Locale }) {
     const sticky = stickyRef.current;
     if (sticky) {
       const handoff = Math.max(0, (progress - HANDOFF_START) / (1 - HANDOFF_START));
-      sticky.style.opacity = String(1 - handoff * 0.9);
+      sticky.style.opacity = shouldRelease ? "0" : String(1 - handoff * 0.9);
       sticky.style.transform = `scale(${1 - handoff * 0.05})`;
+      sticky.style.pointerEvents = shouldRelease ? "none" : "";
     }
   }, []);
 
@@ -106,18 +115,20 @@ export function CinematicHero({ locale }: { locale: Locale }) {
   return (
     <section
       ref={sectionRef}
+      data-cinematic-state={released ? "released" : "active"}
+      className="relative"
       style={{ height: `${scrollVh}vh` }}
       aria-label={dict.home.hero.eyebrow}
     >
       <div
         ref={stickyRef}
-        className="sticky top-0 h-screen w-full overflow-hidden bg-[#0D2922] will-change-[opacity,transform]"
+        className={`${released ? "absolute inset-x-0 bottom-0" : "sticky top-0"} h-[100svh] h-[100dvh] w-full overflow-hidden bg-[#0D2922] will-change-[opacity,transform]`}
       >
         {showCanvas ? (
           <CinematicCanvas
             targetFrameRef={targetFrameRef}
             pointerRef={pointerRef}
-            active={inView}
+            active={inView && !released}
             getDrawableFrame={getDrawableFrame}
             maintainDecodeWindow={maintainDecodeWindow}
           />

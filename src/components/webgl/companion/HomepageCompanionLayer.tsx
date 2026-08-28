@@ -320,7 +320,7 @@ export function HomepageCompanionLayer({ locale }: { locale: Locale }) {
             onClick={() =>
               window.dispatchEvent(new Event("metevet-cat-greet"))
             }
-            className="pointer-events-auto rounded-full border border-white/20 bg-[#0D2922]/88 px-4 py-2 text-sm font-semibold text-white shadow-lg backdrop-blur-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CDA85F]"
+            className="pointer-events-auto flex min-h-11 items-center rounded-full border border-white/20 bg-[#0D2922]/88 px-4 py-2 text-sm font-semibold text-white shadow-lg backdrop-blur-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CDA85F]"
           >
             {locale === "tr" ? "Kediye merhaba de" : "Greet the cat"}
           </button>

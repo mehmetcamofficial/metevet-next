@@ -27,6 +27,10 @@ import {
   COMPANION_CONFIG,
   COMPANION_MODEL_PATH,
 } from "./companion-config";
+import {
+  clampCompanionGaze,
+  getCompanionTargetCssHeight,
+} from "./companion-motion";
 
 function clipForState(state: CompanionState) {
   if (state === "MOVING") return COMPANION_CLIPS.walk;
@@ -118,12 +122,13 @@ export function CompanionCat({
       const rawCenter = rawBox.getCenter(new Vector3());
       const boundsValid =
         Number.isFinite(rawSize.y) && rawSize.y > 0.001 && !rawBox.isEmpty();
-      const targetCssHeight =
-        debugMode
-          ? 180
-          : window.innerHeight < 800
-          ? COMPANION_CONFIG.compactTargetCssHeight
-          : COMPANION_CONFIG.targetCssHeight;
+      const targetCssHeight = debugMode
+        ? 180
+        : getCompanionTargetCssHeight(
+            window.innerHeight,
+            COMPANION_CONFIG.compactTargetCssHeight,
+            COMPANION_CONFIG.targetCssHeight,
+          );
       const desiredWorldHeight =
         (targetCssHeight / Math.max(1, gl.domElement.clientHeight)) *
         COMPANION_CONFIG.orthographicHalfHeight *
@@ -442,32 +447,23 @@ export function CompanionCat({
     const now = performance.now() / 1000;
     const greeting = now < greetUntilRef.current;
     const pointer = pointerRef.current;
-    const targetYaw = greeting
-      ? 0
-      : pointer.active
-        ? MathUtils.clamp(
-            pointer.x * COMPANION_CONFIG.headYawRadians,
-            -COMPANION_CONFIG.headYawRadians,
-            COMPANION_CONFIG.headYawRadians,
-          )
-        : 0;
+    const target = clampCompanionGaze(
+      pointer,
+      COMPANION_CONFIG.headYawRadians,
+      COMPANION_CONFIG.headPitchRadians,
+    );
+    const targetYaw = greeting ? 0 : target.yaw;
     const targetPitch = greeting
       ? -COMPANION_CONFIG.headPitchRadians * 0.7
-      : pointer.active
-        ? MathUtils.clamp(
-            -pointer.y * COMPANION_CONFIG.headPitchRadians,
-            -COMPANION_CONFIG.headPitchRadians,
-            COMPANION_CONFIG.headPitchRadians,
-          )
-        : 0;
+      : target.pitch;
     const tilt = greeting
       ? Math.sin((greetUntilRef.current - now) * Math.PI) *
         COMPANION_CONFIG.headPitchRadians
       : 0;
     const offset = gaze.current;
-    offset.yaw = MathUtils.damp(offset.yaw, targetYaw, 7, delta);
-    offset.pitch = MathUtils.damp(offset.pitch, targetPitch, 7, delta);
-    offset.tilt = MathUtils.damp(offset.tilt, tilt, 7, delta);
+    offset.yaw = MathUtils.damp(offset.yaw, targetYaw, COMPANION_CONFIG.gazeDamping, delta);
+    offset.pitch = MathUtils.damp(offset.pitch, targetPitch, COMPANION_CONFIG.gazeDamping, delta);
+    offset.tilt = MathUtils.damp(offset.tilt, tilt, COMPANION_CONFIG.gazeDamping, delta);
     headBone.rotation.y += offset.yaw;
     headBone.rotation.x += offset.pitch;
     headBone.rotation.z += offset.tilt;
