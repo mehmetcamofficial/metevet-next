@@ -79,6 +79,7 @@ export function CinematicHero({ locale }: { locale: Locale }) {
       const handoff = Math.max(0, (progress - HANDOFF_START) / (1 - HANDOFF_START));
       visual.style.opacity = String(1 - handoff * 0.9);
       visual.style.transform = `scale(${1 - handoff * 0.05})`;
+      visual.style.willChange = handoff >= 1 ? "auto" : "opacity, transform";
     }
   }, []);
 
@@ -122,7 +123,7 @@ export function CinematicHero({ locale }: { locale: Locale }) {
         <div
           ref={visualRef}
           data-cinematic-visual
-          className="relative h-full w-full overflow-hidden bg-[#0D2922] will-change-[opacity,transform]"
+          className="relative h-full w-full overflow-hidden bg-[#0D2922]"
         >
           {showCanvas ? (
             <CinematicCanvas

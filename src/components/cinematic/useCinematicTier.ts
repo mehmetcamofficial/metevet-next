@@ -29,12 +29,15 @@ function detectTier(): CinematicTier {
 function subscribe(onChange: () => void): () => void {
   const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
   motionQuery.addEventListener("change", onChange);
-  window.addEventListener("resize", onChange);
-  window.addEventListener("orientationchange", onChange);
+  let frame: number | null = null;
+  const schedule = () => {
+    if (frame === null) frame = window.requestAnimationFrame(() => { frame = null; onChange(); });
+  };
+  window.addEventListener("resize", schedule, { passive: true });
   return () => {
     motionQuery.removeEventListener("change", onChange);
-    window.removeEventListener("resize", onChange);
-    window.removeEventListener("orientationchange", onChange);
+    window.removeEventListener("resize", schedule);
+    if (frame !== null) window.cancelAnimationFrame(frame);
   };
 }
 

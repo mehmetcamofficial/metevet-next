@@ -175,7 +175,7 @@ export function HomepageCompanionLayer({ locale }: { locale: Locale }) {
       const aboveJourney = rect.top > window.innerHeight * 0.82;
       const isJourneyVisible =
         rect.bottom > 0 && rect.top < window.innerHeight;
-      if (enteredJourney) setActivated(true);
+      if (enteredJourney && !activated) setActivated(true);
       setVisible(!aboveJourney);
       setJourneyVisible(isJourneyVisible);
       setJourneyProgress(progress);
@@ -209,7 +209,7 @@ export function HomepageCompanionLayer({ locale }: { locale: Locale }) {
         window.cancelAnimationFrame(scrollFrame.current);
       }
     };
-  }, []);
+  }, [activated]);
 
   useEffect(() => {
     if (process.env.NODE_ENV !== "development" || !ready) return;

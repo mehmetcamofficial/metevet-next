@@ -242,8 +242,8 @@ test("35. the overlay is updated imperatively through a handle", () => {
 });
 
 test("36. resize and orientation changes are handled", () => {
-  assert.match(SCROLL, /addEventListener\("resize", schedule\)/);
-  assert.match(SCROLL, /addEventListener\("orientationchange", schedule\)/);
+  assert.match(SCROLL, /addEventListener\("resize", schedule, \{ passive: true \}\)/);
+  assert.match(SCROLL, /addEventListener\("orientationchange", schedule, \{ passive: true \}\)/);
 });
 
 test("37. scroll listeners are removed on teardown", () => {
@@ -359,7 +359,7 @@ test("53. pointer state lives in a ref, never in React state", () => {
 });
 
 test("54. GSAP is dynamically imported and used only for the UI layer", () => {
-  assert.match(POINTER, /import\("gsap"\)/);
+  assert.match(POINTER, /loadGsap\(\)/);
   assert.match(POINTER, /gsap\.quickTo/);
 });
 

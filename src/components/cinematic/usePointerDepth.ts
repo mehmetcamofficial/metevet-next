@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, type RefObject } from "react";
 import { DEPTH_AMPLITUDE } from "./cinematic.constants";
+import { loadGsap } from "@/src/components/motion/load-gsap";
 import type { PointerState } from "./CinematicCanvas";
 
 /**
@@ -38,7 +39,7 @@ export function usePointerDepth(
     window.addEventListener("blur", onRelease);
     document.documentElement.addEventListener("mouseleave", onRelease);
 
-    void import("gsap").then(({ gsap }) => {
+    void loadGsap().then(({ gsap }) => {
       if (disposed || !overlayRef.current) return;
       const quickToX = gsap.quickTo(overlayRef.current, "x", {
         duration: 0.7,
@@ -51,16 +52,25 @@ export function usePointerDepth(
 
       let raf: number | null = null;
       const tick = () => {
-        const factor = pointer.active ? 1 : 0;
-        quickToX(-pointer.x * DEPTH_AMPLITUDE.ui * factor);
-        quickToY(-pointer.y * DEPTH_AMPLITUDE.ui * factor);
+        if (!pointer.active) {
+          raf = null;
+          return;
+        }
+        quickToX(-pointer.x * DEPTH_AMPLITUDE.ui);
+        quickToY(-pointer.y * DEPTH_AMPLITUDE.ui);
         raf = window.requestAnimationFrame(tick);
       };
       raf = window.requestAnimationFrame(tick);
 
+      const onResume = () => {
+        if (raf === null && pointer.active) raf = window.requestAnimationFrame(tick);
+      };
+      window.addEventListener("pointermove", onResume, { passive: true });
+
       detach = () => {
         if (raf !== null) window.cancelAnimationFrame(raf);
-        gsap.set(overlayRef.current, { x: 0, y: 0 });
+        window.removeEventListener("pointermove", onResume);
+        if (overlayRef.current) gsap.set(overlayRef.current, { x: 0, y: 0 });
       };
     });
 
