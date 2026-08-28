@@ -12,6 +12,7 @@ import { SkipLink } from "@/src/components/shared/skip-link";
 import { blogCategories, getBlogPosts, getFeaturedPost } from "@/src/data/blog";
 import { isLocale } from "@/src/lib/i18n";
 import { getBlogRoute, getRoutePath } from "@/src/lib/routes";
+import { ImmersivePageHero } from "@/src/components/immersive";
 import type { Locale } from "@/types";
 
 const siteUrl = "https://metevet.com.tr";
@@ -71,17 +72,17 @@ export default async function BlogListingPage({ params }: BlogPageProps) {
         <div className="mx-auto max-w-7xl">
           <Breadcrumbs items={[{ label: isTurkish ? "Ana Sayfa" : "Home", href: getRoutePath("home", resolvedLocale) }, { label: "Blog" }]} />
 
-          <header className="mt-8 overflow-hidden rounded-[2rem] border border-[#0D2922]/10 bg-[#123A30] px-8 py-12 text-white shadow-[0_20px_60px_rgba(13,41,34,0.12)] sm:px-10 lg:px-14 lg:py-16">
-            <p className="text-sm font-semibold uppercase tracking-[0.32em] text-[#CDA85F]">MeteVet Blog</p>
-            <h1 className="mt-5 max-w-4xl text-4xl font-semibold tracking-tight sm:text-5xl">
-              {isTurkish ? "Veteriner Bilgi Merkezi" : "Veterinary Knowledge Center"}
-            </h1>
-            <p className="mt-5 max-w-3xl text-lg leading-8 text-[#DDE9E3]">
-              {isTurkish
-                ? "Patili dostlarınızın sağlığı için güvenilir, anlaşılır ve veteriner muayenesinin önemini merkeze alan bilgiler."
-                : "Clear, responsible guidance for your companion animal's health, always centered on the importance of veterinary examination."}
-            </p>
-          </header>
+          <ImmersivePageHero
+            kicker="MeteVet Blog"
+            title={isTurkish ? "Veteriner Bilgi Merkezi" : "Veterinary Knowledge Center"}
+            description={isTurkish
+              ? "Patili dostlarınızın sağlığı için güvenilir, anlaşılır ve veteriner muayenesinin önemini merkeze alan bilgiler."
+              : "Clear, responsible guidance for your companion animal's health, always centered on the importance of veterinary examination."}
+            imageSrc="/images/blog/cat-vaccination.svg"
+            imageAlt={isTurkish ? "Kedi aşılama" : "Cat vaccination"}
+            chip={isTurkish ? "Bilgi Merkezi" : "Knowledge Center"}
+            tone="dark"
+          />
 
           <section aria-labelledby="featured-heading" className="mt-10 overflow-hidden rounded-[2rem] border border-[#0D2922]/10 bg-white shadow-[0_20px_60px_rgba(13,41,34,0.08)]">
             <div className="grid lg:grid-cols-[1.08fr_0.92fr]">

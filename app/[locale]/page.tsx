@@ -19,6 +19,9 @@ import type { Locale } from "@/types";
 import type { Metadata } from "next";
 import { buildMetadata } from "@/src/lib/metadata";
 import { notFound } from "next/navigation";
+import { WebGLProvider } from "@/src/components/webgl/WebGLProvider";
+import { InteractiveClinicLoader } from "@/src/components/interactive-clinic/InteractiveClinicLoader";
+import { HomepageCompanionLayer } from "@/src/components/webgl/companion/HomepageCompanionLayer";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -60,24 +63,58 @@ export default async function LocaleHomePage({ params }: { params: Promise<{ loc
     <div className="min-h-screen bg-[#F4F0E8] text-[#0D2922]">
       <SkipLink />
       <Navbar locale={resolvedLocale} />
+      <HomepageCompanionLayer locale={resolvedLocale} />
       <main id="main-content">
         <PageTransition>
           <CinematicHero locale={resolvedLocale} />
           <div id="home-content">
-            <TrustStrip locale={resolvedLocale} />
-            <ServicesPreview locale={resolvedLocale} />
-            <DoctorProfile locale={resolvedLocale} />
-            <GallerySection />
-            <CarePhilosophy locale={resolvedLocale} />
-            <AppointmentCTA locale={resolvedLocale} />
-            <BlogPreview locale={resolvedLocale} />
-            <Faq locale={resolvedLocale} />
-            <ContactPreview locale={resolvedLocale} />
+            <div data-home-section="journey">
+              <WebGLProvider
+              scene="clinic"
+              journey
+              poster="/images/clinic/clinic-exam-room.png"
+              posterAlt={resolvedLocale === "tr" ? "MeteVet klinik alanları" : "MeteVet clinic spaces"}
+              journeyCopy={
+                resolvedLocale === "tr"
+                  ? [
+                      {
+                        title: "MeteVet’in kapısından içeri adım atın.",
+                        supporting: "Her ziyaret, güven ve şefkatle karşılanır.",
+                      },
+                      { title: "Her muayene dikkatle başlar.", supporting: "Sakin, özenli ve kişisel bir değerlendirme." },
+                      { title: "Bilimsel yaklaşım, güvenli kararlar.", supporting: "Modern klinik olanaklar doğru kararı destekler." },
+                      { title: "İyileşme, huzurlu bir ortamda devam eder.", supporting: "Konfor, bakım sürecinin önemli bir parçasıdır." },
+                      { title: "Bize ulaşmak çok kolay.", supporting: "Kuşadası’ndaki kliniğimize yolculuğunuzu planlayın." },
+                    ]
+                  : [
+                      {
+                        title: "Step inside MeteVet.",
+                        supporting: "Every visit begins with trust and compassion.",
+                      },
+                      { title: "Every examination begins with attention.", supporting: "A calm, careful and personal assessment." },
+                      { title: "Scientific insight, confident decisions.", supporting: "Modern clinical tools support informed care." },
+                      { title: "Recovery continues in a calm environment.", supporting: "Comfort is an essential part of care." },
+                      { title: "Finding us is easy.", supporting: "Plan your journey to our Kuşadası clinic." },
+                    ]
+              }
+              >
+                <InteractiveClinicLoader locale={resolvedLocale} />
+              </WebGLProvider>
+            </div>
+            <div data-home-section="trust"><TrustStrip locale={resolvedLocale} /></div>
+            <div data-home-section="services"><ServicesPreview locale={resolvedLocale} /></div>
+            <div data-home-section="doctor"><DoctorProfile locale={resolvedLocale} /></div>
+            <div data-home-section="gallery"><GallerySection /></div>
+            <div data-home-section="philosophy"><CarePhilosophy locale={resolvedLocale} /></div>
+            <div data-home-section="appointment"><AppointmentCTA locale={resolvedLocale} /></div>
+            <div data-home-section="blog"><BlogPreview locale={resolvedLocale} /></div>
+            <div data-home-section="faq"><Faq locale={resolvedLocale} /></div>
+            <div data-home-section="contact"><ContactPreview locale={resolvedLocale} /></div>
             <JsonLd data={organizationJsonLd} />
           </div>
         </PageTransition>
       </main>
-      <Footer locale={resolvedLocale} />
+      <div data-home-section="footer"><Footer locale={resolvedLocale} /></div>
       <WhatsappButton label={resolvedLocale === "tr" ? "WhatsApp" : "WhatsApp"} />
     </div>
   );

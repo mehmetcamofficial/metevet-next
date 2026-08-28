@@ -55,6 +55,26 @@ export const dictionaries = {
         primaryCta: "Randevu Al",
         secondaryCta: "WhatsApp",
       },
+      cinematic: {
+        trust: {
+          title: "Bakım, güvenle başlar.",
+          supporting: "Her dost, sakin ve saygılı bir karşılamayı hak eder.",
+        },
+        expertise: {
+          title: "Modern tıp. Şefkatli bakım.",
+          supporting: "Doğru teşhis, özenli ellerde anlam kazanır.",
+        },
+        atmosphere: {
+          title: "Sakin bir ortam, güvenli bir iyileşme.",
+          supporting: "",
+        },
+        exit: {
+          title: "MeteVet ile tanışın",
+          supporting: "Keşfetmeye devam edin",
+        },
+        scrollHint: "Keşfetmek için kaydırın",
+        skip: "Girişi atla",
+      },
       trustStrip: ["4+ Yıl Tecrübe", "2020 Mezuniyeti", "Koruyucu Hekimlik", "Şeffaf İletişim"],
       services: {
         title: "Hizmetlerimiz",
@@ -188,6 +208,26 @@ export const dictionaries = {
           "MeteVet offers modern, trustworthy, and personalized veterinary care for companion animals from preventive medicine to diagnosis and treatment.",
         primaryCta: "Book an Appointment",
         secondaryCta: "WhatsApp",
+      },
+      cinematic: {
+        trust: {
+          title: "Care begins with trust.",
+          supporting: "Every companion deserves a calm, respectful welcome.",
+        },
+        expertise: {
+          title: "Modern medicine. Compassionate care.",
+          supporting: "Accurate diagnosis, delivered with attentive hands.",
+        },
+        atmosphere: {
+          title: "A calm environment, a confident recovery.",
+          supporting: "",
+        },
+        exit: {
+          title: "Meet MeteVet",
+          supporting: "Continue exploring",
+        },
+        scrollHint: "Scroll to explore",
+        skip: "Skip the intro",
       },
       trustStrip: ["4+ Years of Experience", "Graduated in 2020", "Preventive Care", "Transparent Communication"],
       services: {
