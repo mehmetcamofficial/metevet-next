@@ -118,10 +118,17 @@ test("one live cat replaces both procedural guides", () => {
   assert.equal((controller.match(/<CompanionCat/g) ?? []).length, 1);
 });
 
-test("head greeting uses only the verified head and semantic control", () => {
+test("camera-aware gaze uses the verified neck, head and eye bones", () => {
+  assert.match(cat, /getObjectByName\("Neck_23"\)/);
   assert.match(cat, /getObjectByName\("Head_22"\)/);
-  assert.match(config, /headYawRadians:\s*\(12 \* Math\.PI\)/);
-  assert.match(config, /headPitchRadians:\s*\(7 \* Math\.PI\)/);
+  assert.match(cat, /getObjectByName\("Eye\.L_18"\)/);
+  assert.match(cat, /getObjectByName\("Eye\.R_19"\)/);
+  assert.match(cat, /projectPointerToWorldTarget/);
+  assert.match(cat, /worldTargetToGaze/);
+  assert.match(cat, /slerpGazeQuaternion/);
+  assert.match(config, /gazeYawRadians:\s*\(48 \* Math\.PI\)/);
+  assert.match(config, /neckYawRadians:\s*\(12 \* Math\.PI\)/);
+  assert.match(config, /eyeYawRadians:\s*\(10 \* Math\.PI\)/);
   assert.match(homepageLayer, /<button/);
   assert.match(homepageLayer, /Kediye merhaba de/);
   assert.match(homepageLayer, /Greet the cat/);
