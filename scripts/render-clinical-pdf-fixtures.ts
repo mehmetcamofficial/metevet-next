@@ -230,7 +230,8 @@ async function main() {
     ? fixtures.filter((x) => x.file.includes(process.argv[2]))
     : fixtures;
   for (const x of selected) {
-    const buffer = await renderToBuffer(<ClinicalDocument data={x.data} />);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const buffer = await renderToBuffer(React.createElement(ClinicalDocument, { data: x.data }) as any);
     await writeFile(x.file, buffer);
   }
 }
