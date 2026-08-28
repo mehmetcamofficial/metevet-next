@@ -8,7 +8,11 @@ export function WhatsappButton({ label }: { label: string }) {
       href={`https://wa.me/${siteConfig.whatsappNumber}`}
       target="_blank"
       rel="noreferrer"
-      className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 rounded-full bg-[#123A30] px-4 py-3 text-sm font-semibold text-white shadow-[0_16px_50px_rgba(18,58,48,0.28)] transition hover:brightness-110 sm:bottom-6 sm:right-6"
+      className="fixed z-40 inline-flex min-h-11 items-center gap-2 rounded-full bg-[#123A30] px-4 py-3 text-sm font-semibold text-white shadow-[0_16px_50px_rgba(18,58,48,0.28)] transition hover:brightness-110"
+      style={{
+        right: "max(1.25rem, env(safe-area-inset-right))",
+        bottom: "max(1.25rem, env(safe-area-inset-bottom))",
+      }}
       aria-label={label}
     >
       <MessageCircleMore size={18} />

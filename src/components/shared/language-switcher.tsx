@@ -24,7 +24,7 @@ export function LanguageSwitcher() {
             key={locale.code}
             href={href}
             aria-label={locale.code === "tr" ? "Türkçe" : "English"}
-            className={`rounded-full px-3 py-1.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30 ${
+            className={`flex min-h-11 min-w-11 items-center justify-center rounded-full px-3 py-1.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30 ${
               active ? "bg-[#123A30] text-white shadow-sm" : "text-[#0D2922] hover:bg-[#F4F0E8]"
             }`}
           >

@@ -26,10 +26,10 @@ export function MobileMenu({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#F4F0E8] xl:hidden" role="dialog" aria-modal="true" aria-label={locale === "tr" ? "Mobil navigasyon" : "Mobile navigation"}>
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#F4F0E8] pt-[env(safe-area-inset-top)] xl:hidden" role="dialog" aria-modal="true" aria-label={locale === "tr" ? "Mobil navigasyon" : "Mobile navigation"}>
       <div className="flex h-[68px] items-center justify-between border-b border-black/10 px-6">
         <Logo locale={locale} layout="horizontal" markSize={40} />
-        <button onClick={onClose} className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 text-[#0D2922] transition hover:border-[#123A30] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30" aria-label={locale === "tr" ? "Menüyü kapat" : "Close navigation"}>
+        <button onClick={onClose} className="flex h-11 w-11 items-center justify-center rounded-full border border-black/10 text-[#0D2922] transition hover:border-[#123A30] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30" aria-label={locale === "tr" ? "Menüyü kapat" : "Close navigation"}>
           <X size={18} />
         </button>
       </div>
