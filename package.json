@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "generate:fixtures": "node --no-warnings --experimental-strip-types scripts/render-clinical-pdf-fixtures.ts",
     "test:phase2": "node --no-warnings --experimental-strip-types --test tests/phase-2/*.test.ts"
   },
   "dependencies": {

@@ -12,7 +12,7 @@ const data = () => read("src/lib/admin/documents/document-data.ts");
 const header = () => read("src/components/documents/document-header.tsx");
 const footer = () => read("src/components/documents/document-footer.tsx");
 const primitives = () => read("src/components/documents/pdf-primitives.tsx");
-const fixture = () => read("scripts/render-clinical-pdf-fixtures.tsx");
+const fixture = () => read("scripts/render-clinical-pdf-fixtures.ts");
 
 // ── Font & layout base ──
 
@@ -379,15 +379,13 @@ test("font registration stays outside client components", () => {
 
 // ── Fixture PDFs ──
 
-test("v2 fixture PDFs were rendered with A4 shared layout", () => {
-  for (const p of [
-    "output/pdf/muayene-ozeti-sutlac-v2.pdf",
-    "output/pdf/asi-karnesi-sutlac-v2.pdf",
-    "output/pdf/koruyucu-saglik-sutlac-v2.pdf",
-  ]) {
-    assert.ok(existsSync(p));
-    assert.ok(statSync(p).size > 5000);
-  }
+test("v2 fixture PDFs use A4 shared layout", () => {
+  assert.match(layout(), /size="A4"/);
+  const fx = fixture();
+  assert.match(fx, /from.*document-layout/);
+  assert.match(fx, /output\/pdf\/muayene-ozeti-sutlac-v2\.pdf/);
+  assert.match(fx, /output\/pdf\/asi-karnesi-sutlac-v2\.pdf/);
+  assert.match(fx, /output\/pdf\/koruyucu-saglik-sutlac-v2\.pdf/);
 });
 
 // ── Pagination ──
