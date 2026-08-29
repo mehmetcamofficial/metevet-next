@@ -18,6 +18,10 @@ import {
 } from "../ClinicJourneyScene";
 import { CompanionController } from "./CompanionController";
 import { CompanionCamera } from "./CompanionCamera";
+import {
+  applyIntersectionSamples,
+  pickClosestIntersectingSection,
+} from "./companion-motion";
 
 const HOME_SECTIONS = [
   "journey",
@@ -185,17 +189,36 @@ export function HomepageCompanionLayer({ locale }: { locale: Locale }) {
         scrollFrame.current = window.requestAnimationFrame(update);
       }
     };
+    // IntersectionObserver callbacks only report the targets whose
+    // intersection status *changed* since the last observation, not every
+    // section currently intersecting. Picking "current" straight out of that
+    // partial batch made activeSection flap between neighbouring sections
+    // near a boundary: a fast scroll can deliver "trust entered" and "journey
+    // exited" as separate callbacks, and briefly the batch contains only one
+    // of the two, so the derived best match ping-pongs. Track the full set of
+    // currently-intersecting sections ourselves and always choose from that
+    // (see companion-motion.ts for the pure, unit-tested selection logic).
+    const intersecting = new Map<string, number>();
     const sectionObserver = new IntersectionObserver(
       (entries) => {
-        const current = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort(
-            (a, b) =>
-              Math.abs(a.boundingClientRect.top - window.innerHeight * 0.55) -
-              Math.abs(b.boundingClientRect.top - window.innerHeight * 0.55),
-          )[0];
-        const id = current?.target.getAttribute("data-home-section");
-        if (id) setActiveSection(id);
+        applyIntersectionSamples(
+          intersecting,
+          entries
+            .map((entry) => ({
+              id: entry.target.getAttribute("data-home-section"),
+              isIntersecting: entry.isIntersecting,
+              top: entry.boundingClientRect.top,
+            }))
+            .filter(
+              (sample): sample is { id: string; isIntersecting: boolean; top: number } =>
+                sample.id !== null,
+            ),
+        );
+        const bestId = pickClosestIntersectingSection(
+          intersecting,
+          window.innerHeight * 0.55,
+        );
+        if (bestId) setActiveSection(bestId);
       },
       { rootMargin: "-38% 0px -38% 0px", threshold: 0 },
     );
