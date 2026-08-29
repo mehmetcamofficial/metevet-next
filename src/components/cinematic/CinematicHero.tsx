@@ -6,9 +6,9 @@ import { ChevronDown } from "lucide-react";
 import { getDictionary } from "@/src/lib/i18n";
 import type { Locale } from "@/types";
 import {
-  HANDOFF_START,
   TIER_SCROLL_VH,
   frameUrl,
+  getCinematicHandoff,
   getCinematicLifecycle,
   progressToFrame,
 } from "./cinematic.constants";
@@ -76,9 +76,10 @@ export function CinematicHero({ locale }: { locale: Locale }) {
     // Hand the screen over to the page below instead of cutting to it.
     const visual = visualRef.current;
     if (visual) {
-      const handoff = Math.max(0, (progress - HANDOFF_START) / (1 - HANDOFF_START));
-      visual.style.opacity = String(1 - handoff * 0.9);
-      visual.style.transform = `scale(${1 - handoff * 0.05})`;
+      const handoff = getCinematicHandoff(progress);
+      visual.style.opacity = String(handoff.opacity);
+      visual.style.transform = `scale(${handoff.scale})`;
+      visual.style.pointerEvents = handoff.pointerEvents;
     }
   }, []);
 
