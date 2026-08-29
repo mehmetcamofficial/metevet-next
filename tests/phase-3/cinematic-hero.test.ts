@@ -651,3 +651,49 @@ test("96. no trailing whitespace in the cinematic modules", () => {
     assert.equal(offenders.length, 0);
   }
 });
+
+// ── Handoff lifecycle (layering regression) ──
+//
+// Regression: the sticky viewport keeps the hero's plate within the layout
+// for roughly one more viewport height after scroll progress reaches 1 (that
+// is how CSS `position: sticky` releases). The previous handoff formula
+// capped opacity at `1 - handoff * 0.9`, so it only ever reached 0.1 and
+// never actually vanished — the plate stayed visible as a faint, non-clickable
+// ghost over whatever the next section painted underneath it while it
+// scrolled out. getCinematicHandoff must reach true zero by progress 1.
+
+test("97. the handoff reaches full transparency by progress 1", async () => {
+  const { getCinematicHandoff, HANDOFF_START } = await import(
+    "../../src/components/cinematic/cinematic.constants.ts"
+  );
+  assert.equal(getCinematicHandoff(1).opacity, 0);
+  assert.equal(getCinematicHandoff(HANDOFF_START).opacity, 1);
+  assert.ok(getCinematicHandoff(2).opacity === 0, "progress past 1 must stay fully transparent");
+});
+
+test("98. handoff opacity decreases monotonically across the fade window", async () => {
+  const { getCinematicHandoff } = await import(
+    "../../src/components/cinematic/cinematic.constants.ts"
+  );
+  let previous = Infinity;
+  for (let step = 0; step <= 100; step++) {
+    const { opacity } = getCinematicHandoff(step / 100);
+    assert.ok(opacity <= previous + 1e-9, `opacity increased at step ${step}`);
+    assert.ok(opacity >= 0 && opacity <= 1, `opacity out of range at step ${step}`);
+    previous = opacity;
+  }
+});
+
+test("99. the plate stops intercepting pointer events once fully handed off", async () => {
+  const { getCinematicHandoff } = await import(
+    "../../src/components/cinematic/cinematic.constants.ts"
+  );
+  assert.equal(getCinematicHandoff(1).pointerEvents, "none");
+  assert.equal(getCinematicHandoff(0.5).pointerEvents, "auto");
+});
+
+test("100. CinematicHero drives opacity/transform/pointer-events from the pure handoff helper", () => {
+  assert.match(HERO, /getCinematicHandoff\(progress\)/);
+  assert.match(HERO, /visual\.style\.opacity = String\(handoff\.opacity\)/);
+  assert.match(HERO, /visual\.style\.pointerEvents = handoff\.pointerEvents/);
+});

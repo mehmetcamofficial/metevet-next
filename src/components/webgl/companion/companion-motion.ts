@@ -150,3 +150,65 @@ export function getTouchIdleGaze(seconds: number): CompanionGaze {
 export function getCompanionTargetCssHeight(viewportHeight: number, compact: number, desktop: number) {
   return viewportHeight < 800 ? compact : desktop;
 }
+
+// ── Active-section selection ──
+
+/**
+ * A minimal, serializable stand-in for the fields we read off an
+ * IntersectionObserverEntry, so the selection logic below can be unit tested
+ * without a DOM.
+ */
+export type IntersectionSample = {
+  id: string;
+  isIntersecting: boolean;
+  top: number;
+};
+
+/**
+ * Picks the section id closest to the viewport's vertical centre band out of
+ * a *complete* map of currently-intersecting sections.
+ *
+ * IntersectionObserver callbacks only report the entries whose intersection
+ * status changed since the previous callback — not every element currently
+ * intersecting. Selecting "current" straight out of one callback's entries
+ * (instead of folding each entry into a persistent set first) makes the
+ * choice depend on which sections happened to be batched together, and a
+ * fast scroll near a section boundary can deliver "next section entered" and
+ * "previous section exited" as separate callbacks — so the derived target
+ * flaps between the two while the batches arrive. Callers must fold entries
+ * into a persistent id -> top map (add on enter, delete on exit) and always
+ * select from that full map, never from a single callback's entry list.
+ */
+export function pickClosestIntersectingSection(
+  intersecting: ReadonlyMap<string, number>,
+  viewportCenter: number,
+): string | null {
+  let bestId: string | null = null;
+  let bestDistance = Infinity;
+  for (const [id, top] of intersecting) {
+    const distance = Math.abs(top - viewportCenter);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      bestId = id;
+    }
+  }
+  return bestId;
+}
+
+/**
+ * Folds one IntersectionObserver callback's entries into a persistent
+ * id -> top map in place, matching the enter/exit semantics the browser
+ * reports (present in the map while intersecting, removed once it isn't).
+ */
+export function applyIntersectionSamples(
+  intersecting: Map<string, number>,
+  samples: readonly IntersectionSample[],
+): void {
+  for (const sample of samples) {
+    if (sample.isIntersecting) {
+      intersecting.set(sample.id, sample.top);
+    } else {
+      intersecting.delete(sample.id);
+    }
+  }
+}

@@ -271,3 +271,84 @@ test("no physics dependency or CinematicHero integration was added", () => {
   const hero = read("src/components/cinematic/CinematicHero.tsx");
   assert.doesNotMatch(hero, /CompanionCat|metevet-cat|companion/);
 });
+
+// ── Active-section selection (jitter regression) ──
+//
+// Regression: IntersectionObserver callbacks only report the targets whose
+// intersection status *changed* since the previous callback, not every
+// currently-intersecting section. The homepage layer used to derive the
+// "closest to viewport centre" section straight from that partial batch, so
+// a fast scroll near a section boundary — where "next section enters" and
+// "previous section exits" can be delivered as separate callbacks — made the
+// companion's target anchor (and therefore its screen position) flap between
+// two sections. The fix folds every callback into a persistent id -> top map
+// and always selects from the full map.
+
+test("HomepageCompanionLayer folds IntersectionObserver entries into a persistent map", () => {
+  assert.match(homepageLayer, /applyIntersectionSamples/);
+  assert.match(homepageLayer, /pickClosestIntersectingSection/);
+  assert.doesNotMatch(
+    homepageLayer,
+    /entries\s*\.filter\(\(entry\) => entry\.isIntersecting\)\s*\.sort/,
+  );
+});
+
+test("pickClosestIntersectingSection chooses from the full intersecting set, not a partial batch", async () => {
+  const { pickClosestIntersectingSection } = await import(
+    "../../src/components/webgl/companion/companion-motion.ts"
+  );
+  // "journey" entered in an earlier callback and is still intersecting; this
+  // callback's batch only reports "trust" entering. A selection that reads
+  // straight from the batch would wrongly jump straight to trust even though
+  // journey is still the better centred section.
+  const intersecting = new Map([
+    ["journey", 40],
+    ["trust", 900],
+  ]);
+  assert.equal(pickClosestIntersectingSection(intersecting, 450), "journey");
+});
+
+test("applyIntersectionSamples adds on enter and removes on exit without touching untouched sections", async () => {
+  const { applyIntersectionSamples } = await import(
+    "../../src/components/webgl/companion/companion-motion.ts"
+  );
+  const intersecting = new Map([["journey", 40]]);
+  applyIntersectionSamples(intersecting, [
+    { id: "trust", isIntersecting: true, top: 900 },
+  ]);
+  assert.deepEqual([...intersecting.keys()].sort(), ["journey", "trust"]);
+
+  applyIntersectionSamples(intersecting, [
+    { id: "journey", isIntersecting: false, top: -50 },
+  ]);
+  assert.deepEqual([...intersecting.keys()], ["trust"]);
+});
+
+test("a scroll that delivers boundary crossings as separate callbacks does not flap the pick", async () => {
+  const { applyIntersectionSamples, pickClosestIntersectingSection } = await import(
+    "../../src/components/webgl/companion/companion-motion.ts"
+  );
+  const intersecting = new Map<string, number>();
+  const center = 495;
+
+  // Callback 1: journey is the only section on screen.
+  applyIntersectionSamples(intersecting, [{ id: "journey", isIntersecting: true, top: 460 }]);
+  assert.equal(pickClosestIntersectingSection(intersecting, center), "journey");
+
+  // Callback 2 (separate observer tick): trust enters near the bottom edge,
+  // journey has not been reported as exited yet.
+  applyIntersectionSamples(intersecting, [{ id: "trust", isIntersecting: true, top: 880 }]);
+  assert.equal(
+    pickClosestIntersectingSection(intersecting, center),
+    "journey",
+    "journey is still better centred and must not be dropped just because it wasn't in this batch",
+  );
+
+  // Callback 3: journey finally reports its exit.
+  applyIntersectionSamples(intersecting, [{ id: "journey", isIntersecting: false, top: -820 }]);
+  assert.equal(pickClosestIntersectingSection(intersecting, center), "trust");
+
+  // No further callback should move the pick back to journey — it is gone
+  // from the map for good until it re-enters.
+  assert.equal(pickClosestIntersectingSection(intersecting, center), "trust");
+});

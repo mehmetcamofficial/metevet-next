@@ -154,6 +154,28 @@ export function isCinematicReleased(progress: number): boolean {
   return getCinematicLifecycle(progress) === "released";
 }
 
+/**
+ * Hand-off visual state for the sticky hero plate as scroll progress crosses
+ * HANDOFF_START. Must reach fully transparent (opacity 0) and non-interactive
+ * by progress 1 — the sticky viewport keeps the plate within the layout for
+ * roughly one more viewport height after release, so anything short of full
+ * transparency here shows up as a lingering ghost over the next section.
+ */
+export type CinematicHandoff = {
+  opacity: number;
+  scale: number;
+  pointerEvents: "auto" | "none";
+};
+
+export function getCinematicHandoff(progress: number): CinematicHandoff {
+  const handoff = Math.max(0, Math.min(1, (progress - HANDOFF_START) / (1 - HANDOFF_START)));
+  return {
+    opacity: 1 - handoff,
+    scale: 1 - handoff * 0.05,
+    pointerEvents: handoff >= 1 ? "none" : "auto",
+  };
+}
+
 // ── Rendering ──
 
 export const ZOOM_FACTOR = 1.18;
