@@ -117,7 +117,7 @@ export function CinematicHero({ locale }: { locale: Locale }) {
     >
       <div
         data-cinematic-viewport
-        className="sticky top-0 h-[100svh] h-[100dvh] w-full overflow-hidden"
+        className="cinematic-viewport sticky top-0 w-full overflow-hidden"
       >
         <div
           ref={visualRef}
