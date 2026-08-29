@@ -128,6 +128,9 @@ export function Navbar({ locale }: { locale: Locale }) {
             onClick={() => setOpen(true)}
             className="flex h-11 w-11 items-center justify-center rounded-full border border-[#123A30]/15 bg-white/90 text-[#123A30] transition hover:border-[#123A30] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#123A30]/30 xl:hidden"
             aria-label={locale === "tr" ? "Menüyü aç" : "Open menu"}
+            aria-haspopup="dialog"
+            aria-expanded={open}
+            aria-controls="mobile-navigation"
           >
             <Menu size={18} />
           </button>

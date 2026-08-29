@@ -449,7 +449,7 @@ test("66. the hero hands over to the page instead of cutting", () => {
   assert.match(CONSTANTS, /HANDOFF_START/);
   assert.match(HERO, /visual\.style\.opacity/);
   assert.match(HERO, /visual\.style\.transform = `scale\(/);
-  assert.match(HERO, /className="sticky top-0/);
+  assert.match(HERO, /className="cinematic-viewport sticky top-0/);
   assert.doesNotMatch(HERO, /style\.position\s*=|stickyRef/);
 });
 

@@ -21,12 +21,32 @@ html {
 
 body {
   min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
   background:
     radial-gradient(circle at top left, rgba(205, 168, 95, 0.16), transparent 24%),
     linear-gradient(135deg, #f4f0e8 0%, #f7f4ea 100%);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   text-rendering: optimizeLegibility;
+}
+
+/*
+ * Cinematic pinned viewport height.
+ *
+ * `dvh` tracks the mobile Safari/Chrome dynamic toolbar so the pinned hero
+ * never leaves a gap (or clips) as the address bar shows/hides, while the
+ * `vh`/`svh` declarations above it are a same-property cascade fallback for
+ * browsers that don't support `dvh` yet — the browser drops any declaration
+ * with an unsupported unit and keeps the previous one, so this is safe
+ * layering, unlike applying `h-[100svh] h-[100dvh]` as two Tailwind
+ * utility classes (their relative order in the generated stylesheet is not
+ * guaranteed to match source order).
+ */
+.cinematic-viewport {
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
 }
 
 ::selection {

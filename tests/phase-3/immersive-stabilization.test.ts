@@ -68,7 +68,7 @@ test("the sticky cinematic lifecycle releases and reactivates cleanly", () => {
   assert.equal(isCinematicReleased(0.4), false);
   assert.equal(getCinematicLifecycle(1), "released");
   assert.equal(getCinematicLifecycle(0.4), "active");
-  assert.match(CINEMATIC_HERO, /className="sticky top-0/);
+  assert.match(CINEMATIC_HERO, /className="cinematic-viewport sticky top-0/);
   assert.match(CINEMATIC_HERO, /data-cinematic-visual/);
   assert.doesNotMatch(CINEMATIC_HERO, /style\.position\s*=|stickyRef/);
 });
